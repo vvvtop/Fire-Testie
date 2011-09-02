@@ -19,7 +19,7 @@ dialog q:before,dialog q:after {content:'';}
 dialog address,dialog cite,dialog em {font-style:normal;}
 /*general*/
 dialog {
-    z-index:9999;
+    z-index:2147483647;
     border:1px solid #eee;
     display:block;
     position:absolute;

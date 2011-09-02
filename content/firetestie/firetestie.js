@@ -1,6 +1,6 @@
 FBL.ns(function() { with (FBL) {
     var HIGHLIGHTTYPE="boxModel",
-        BOXFRAME="content";
+        BOXFRAME="border";
     var fireTestiePanel=function(){},
         config = Firebug.getModuleLoaderConfig(),
         modules = ["firebug/lib/css","firebug/lib/dom","firebug/lib/events","firebug/firefox/menu"],
@@ -122,12 +122,44 @@ FBL.ns(function() { with (FBL) {
                     
                     context=Firebug.currentContext;
                     styleSheet=documentElement.createElement("style");
-                    styleSheet.innerHTML="dialog dialog h1,dialog h2,dialog h3,dialog h4,dialog h5,dialog h6,dialog p,dialog hr,dialog article,dialog aside,dialog section,dialog figure,dialog footer,dialog header,dialog dl,dialog dt,dialog dd,dialog ul,dialog ol,dialog li,dialog th,dialog td,dialog form,dialog fieldset,dialog input,dialog button,dialog textarea{margin:0;padding:0;}dialog header,dialog nav,dialog footer,dialog wrapper,dialog csstable,dialog marginbox,dialog contentbox,dialog paddingbox,dialog borderbox,dialog section{display:block;}dialog button,dialog input,dialog select,dialog textarea{font:12px/1 Tahoma,Arial;}dialog button,dialog h1,dialog h2,dialog h3,dialog h4,dialog h5,dialog h6{font-size:100%;font:normal 12px Tahoma,Arial;}dialog li{list-style:none;}dialog button,dialog input,dialog select,dialog textarea{font-size:100%;border:none;background:none;}dialog input:focus,dialog textarea:focus{outline:none;}dialog fieldset,dialog img{border:0 none;}dialog img{vertical-align:middle;}dialog table{border-collapse:collapse;border-spacing:0;}dialog q:before,dialog q:after{content:'';}dialog address,dialog cite,dialog em{font-style:normal;}dialog{z-index:2147483647;border:1px solid #eee;display:block;position:absolute;top:200px;left:200px;width:260px;height:370px;-moz-border-radius:3px;-moz-box-shadow:0 0 10px rgba(0,0,0,0.2);background:#ededed;margin:0;padding:0;}dialog h1{color:#F47A24;font-size:22px;font-weight:bold;font-family:Arial;line-height:140%;text-indent:5px;border-bottom:1px dashed #d5d5d5;}csstable{font-size:11px;margin:7px auto auto 15px;border-bottom:1px dashed #d5d5d5;}csstable tr{height:18px;}csstable .cssname{width:85px;font-weight:bold;}marginbox,contentbox,paddingbox,borderbox{margin:25px auto;}marginbox{width:200px;height:200px;border:1px dashed #000;}borderbox{width:150px;height:150px;border:1px dashed #000;}paddingbox{width:100px;height:100px;border:1px dashed #000;}contentbox{width:50px;height:50px;border:1px dashed #000;}.layout-figure{position:absolute;font-size:10px;}.figure_x{top:255px;}.figure_y{right:121px}.margin-left{right:207px;text-align:right;}.margin-right{left:207px;text-align:left;}.margin-top{top:165px;}.margin-bottom{top:340px;}.border-left{right:182px;text-align:right;}.border-right{left:182px;text-align:left;}.border-top{top:194px;}.border-bottom{top:314px;}.offset-left{right:235px;text-align:right;}.offset-right{left:235px;text-align:left;}.offset-top{top:143px;}.offset-bottom{top:360px;}.padding-left{right:157px;text-align:right;}.padding-right{left:157px;text-align:left;}.padding-top{top:222px;}.padding-bottom{top:285px;}.label-margin{top:155px;left:30px;}.label-border{top:181px;left:55px;}.label-padding{top:208px;left:81px;}.label-content{left:107px;}.label-offset{left:5px;top:132px;}";
-
-                    documentElement.head.appendChild(styleSheet);
+                    styleSheet.innerHTML='dialog dialog h1,dialog h2,dialog h3,dialog h4,dialog h5,dialog h6,dialog p,dialog hr,'+
+                                        'dialog article,dialog aside,dialog section,dialog figure,dialog footer,dialog header,dialog'+
+                                        'dl,dialog dt,dialog dd,dialog ul,dialog ol,dialog li,dialog th,dialog td,dialog'+
+                                        'form,dialog fieldset,dialog input,dialog button,dialog textarea{margin:0;padding:0;}dialog header,'+
+                                        'dialog nav,dialog footer,dialog wrapper,dialog csstable,dialog marginbox,dialog contentbox,'+
+                                        'dialog paddingbox,dialog borderbox,dialog section{display:block;}dialog button,dialog input,'+
+                                        'dialog select,dialog textarea{font:12px/1 Tahoma,Arial;}dialog button,dialog h1,dialog h2,dialog h3,'+
+                                        'dialog h4,dialog h5,dialog h6{font-size:100%;font:normal 12px Tahoma,Arial;}dialog li{list-style:none;'+
+                                        '}dialog button,dialog input,dialog select,dialog textarea{font-size:100%;border:none;background:none;}'+
+                                        'dialog input:focus,dialog textarea:focus{outline:none;}dialog fieldset,dialog img{border:0 none;}'+
+                                        'dialog img{vertical-align:middle;}dialog table{border-collapse:collapse;border-spacing:0;}dialog q:'+
+                                        'before,dialog q:after{content:"";}dialog address,dialog cite,dialog em{font-style:normal;}dialog{z-index'+
+                                        ':2147483647;border:1px solid #eee;display:block;position:absolute;top:200px;left:200px;width:260px;height:'+
+                                        'auto;-moz-border-radius:3px;-moz-box-shadow:0 0 10px rgba(0,0,0,0.2);background:#ededed;margin:0;padding:0;text-align: start;}'+
+                                        'layout{position:relative;width:100%;height:500px;}dialog h1{margin:0;padding:0;color:#F47A24;font-size:22px;font-weight:bold;'+
+                                        'font-family:Arial;line-height:140%;text-indent:5px;border-bottom:1px dashed #d5d5d5;height:31px;text-align:left;'+
+                                        '}csstable{font-size:11px;margin:7px auto auto 15px;border-bottom:1px dashed #d5d5d5;}csstable tr{height:18px;'+
+                                        '}csstable .cssname{width:75px;font-weight:bold;}marginbox,contentbox,paddingbox,borderbox{margin:25px auto;}'+
+                                        'marginbox{width:200px;height:200px;border:1px dashed #000;}borderbox{width:150px;height:150px;border:1px dashed #000;'+
+                                        '}paddingbox{width:100px;height:100px;border:1px dashed #000;}contentbox{width:50px;height:50px;border:1px dashed #000;}'+
+                                        '.layout-figure{position:absolute;font-size:10px;}.figure_x{top:138px;}.figure_y{right:-134px}'+
+                                        '.margin-left{right:-53px;text-align:right;}.margin-right{left:207px;text-align:left;}'+
+                                        '.margin-top{top:50px;}.margin-bottom{top:218px;}.border-left{right:-78px;text-align:right;'+
+                                        '}.border-right{left:182px;text-align:left;}.border-top{top:79px;'+
+                                        '}.border-bottom{top:192px;}.offset-left{right:-26px;text-align:right;'+
+                                        '}.offset-right{left:235px;text-align:left;}.offset-top{top:26px;}'+
+                                        '.offset-bottom{top:243px;}.padding-left{right:-103px;text-align:right;'+
+                                        '}.padding-right{left:157px;text-align:left;}.padding-top{top:105px;}.padding-bottom{'+
+                                        'top:169px;}.label-margin{top:38px;left:30px;}.label-border{top:55px;left:55px;}'+
+                                        '.label-padding{top:91px;left:81px;}.label-content{left:107px;}.label-offset{left:5px;top:15px;}';
+                    
+                    if(documentElement!==undefined){
+                        documentElement.head.appendChild(styleSheet);
                 
-                    documentElement.addEventListener("mouseover", onInspectingMouseOver, true);
-                    documentElement.addEventListener("mouseout",onInspectingMouseOut,true); /**/
+                        documentElement.addEventListener("mouseover", onInspectingMouseOver, true);
+                        documentElement.addEventListener("mouseout",onInspectingMouseOut,true); /**/
+                    }
+                    
                 },
                 hide=function(){
                     if(styleSheet){
