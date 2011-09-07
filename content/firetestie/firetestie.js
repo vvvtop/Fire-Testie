@@ -40,13 +40,12 @@ var evt=function(){
 }();    
 require(config, modules,function(Css,Dom,Events,Menu){
     fireTestiePanel.prototype = extend(Firebug.Panel,function(){
-        var document,readyTimeout,context,styleSheet,ftBox,tmpDoc,
+        var document,readyTimeout,context,styleSheet,ftBox,tmpDoc,flag=false,
             drawBox=function(){},
             windowX=0,
             windowY=0,
             initialize=function(){
                 Firebug.Panel.initialize.apply(this, arguments);
-                Firebug.Console.log("initialize");
             },
             ready=function(){
                 waitReady();
@@ -75,7 +74,6 @@ require(config, modules,function(Css,Dom,Events,Menu){
                 }
             },
             start=function(){
-                Firebug.Console.log("START!!");
                 windowX=document.documentElement.clientWidth;
                 windowY=document.documentElement.clientHeight;
                 evt.addListerner(document.defaultView,"resize",function(e){
@@ -95,7 +93,11 @@ require(config, modules,function(Css,Dom,Events,Menu){
                 evt.addListerner(document,"mouseout",onInspectingMouseOut);
 
                 drawBox=function(){
-                    ftBox=document.createElement('dialog');
+                    if(!flag){
+                        ftBox=document.createElement('dialog');
+                        flag=true;
+                    }
+
                     var boxStyle=document.createElement('style'),
                         title=document.createElement('h1'),
                         csstable=document.createElement('csstable');
@@ -151,8 +153,8 @@ require(config, modules,function(Css,Dom,Events,Menu){
                         }
                         cssTableInner+='</tbody></table>';
                         csstable.innerHTML=cssTableInner;
-                        
-                        layout.innerHTML='<span class="layout-figure offset-left figure_x" id="">'+args.x+'</span>'+
+                        //Math.ceil(1.3)
+                        layout.innerHTML='<span class="layout-figure offset-left figure_x" id="">'+Math.ceil(args.x)+'</span>'+
                                      '<span class="layout-figure offset-right figure_x" id="">0</span>'+
                                      '<span class="layout-figure offset-top figure_y" id="">'+args.y+'</span>'+
                                      '<span class="layout-figure offset-bottom figure_y" id="">0</span>'+
@@ -275,12 +277,10 @@ require(config, modules,function(Css,Dom,Events,Menu){
             show=function(){
                 document=undefined;
                 ready();
-                FBTrace.sysout("shown");
-                Firebug.Console.log("shown");
+
             },
             hide=function(){
-                FBTrace.sysout("hidden");
-                Firebug.Console.log("hidden");
+
                 evt.removeAll();
                 evt.removeListener(document,"mouseover", onInspectingMouseOver);
                  Firebug.Inspector.clearAllHighlights();
