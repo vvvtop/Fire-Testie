@@ -26,11 +26,17 @@ dialog {
     top:200px;
     left:200px;
     width:260px;
-    height:370px;
+    height:auto;
     -moz-border-radius:3px;
     -moz-box-shadow:0 0 10px rgba(0, 0, 0, 0.2);
     background:#ededed;
     margin:0;padding:0;
+    text-align: start;
+}
+layout{
+    position:relative;
+    width:100%;
+    height:500px;
 }
 dialog h1{
     color:#F47A24;
@@ -40,6 +46,8 @@ dialog h1{
     line-height:140%;
     text-indent:5px;
     border-bottom:1px dashed #d5d5d5;
+    height:31px;
+    text-align:left;
 }
 csstable{
     font-size:11px;
@@ -82,13 +90,13 @@ contentbox{
     font-size:10px;
 }
 .figure_x{
-    top:255px;
+    top:138px;
 }
 .figure_y{
-    right:121px
+    right:-134px
 }
 .margin-left{
-    right:207px;
+    right:-53px;
     text-align:right;
 }
 .margin-right{
@@ -96,14 +104,14 @@ contentbox{
     text-align:left;
 }
 .margin-top{
-    top:165px;
+    top:50px;
 }
 .margin-bottom{
-    top:340px;
+    top:218px;
 }
 
 .border-left{
-    right:182px;
+    right:-78px;
     text-align:right;
 }
 .border-right{
@@ -111,14 +119,14 @@ contentbox{
     text-align:left;
 }
 .border-top{
-    top:194px;
+    top:79px;
 }
 .border-bottom{
-    top:314px;
+    top:192px;
 }
 
 .offset-left{
-    right:235px;
+    right:-26px;
     text-align:right;
 }
 .offset-right{
@@ -126,15 +134,15 @@ contentbox{
     text-align:left;
 }
 .offset-top{
-    top:143px;
+    top:26px;
 }
 .offset-bottom{
-    top:360px;
+    top:243px;
 }
 
 
 .padding-left{
-    right:157px;
+    right:-103px;
     text-align:right;
 }
 .padding-right{
@@ -142,21 +150,21 @@ contentbox{
     text-align:left;
 }
 .padding-top{
-    top:222px;
+    top:105px;
 }
 .padding-bottom{
-    top:285px;
+    top:169px;
 }
 .label-margin{
-    top:155px;
+    top:38px;
     left:30px;
 }
 .label-border{
-    top:181px;
+    top:55px;
     left:55px;
 }
 .label-padding{
-    top:208px;
+    top:91px;
     left:81px;
 }
 .label-content{
@@ -164,5 +172,5 @@ contentbox{
 }
 .label-offset{
     left:5px;
-    top:132px;
+    top:15px;
 }
