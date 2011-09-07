@@ -14,7 +14,30 @@ var HIGHLIGHTTYPE='boxModel',
     ],
     fireTestiePanel=function(){},
     undefined;
-    
+var evt=function(){
+    var list=[];
+    return {
+        addListerner:function(element,type,callback){
+            element.addEventListener(type,callback,true);
+            list.push({
+                element:element,
+                callback:callback,
+                type:type
+            });
+        },
+        removeListener:function(element,type,callback){
+            element.removeEventListener(type,callback,true);
+        },
+        removeAll:function(){
+            try{
+                for(index in list){
+                    evt.removeListener(list[index].element,list[index].type,list[index].callback,true);
+                }
+            }catch(e){}
+            
+        }
+    };
+}();    
 require(config, modules,function(Css,Dom,Events,Menu){
     fireTestiePanel.prototype = extend(Firebug.Panel,function(){
         var document,readyTimeout,context,styleSheet,ftBox,tmpDoc,
@@ -55,15 +78,22 @@ require(config, modules,function(Css,Dom,Events,Menu){
                 Firebug.Console.log("START!!");
                 windowX=document.documentElement.clientWidth;
                 windowY=document.documentElement.clientHeight;
-                document.defaultView.addEventListener("resize",function(e){
+                evt.addListerner(document.defaultView,"resize",function(e){
                     windowX=document.documentElement.clientWidth;
                     windowY=document.documentElement.clientHeight;
-                },true);
+                });
+                /* document.defaultView.addEventListener("resize",function(e){
+                    windowX=document.documentElement.clientWidth;
+                    windowY=document.documentElement.clientHeight;
+                },true); */
                 
                 context=Firebug.currentContext;
                 
-                document.addEventListener("mouseover",onInspectingMouseOver,true);
-                document.addEventListener("mouseout",onInspectingMouseOut,true);
+                /* document.addEventListener("mouseover",onInspectingMouseOver,true);
+                document.addEventListener("mouseout",onInspectingMouseOut,true); */
+                evt.addListerner(document,"mouseover",onInspectingMouseOver);
+                evt.addListerner(document,"mouseout",onInspectingMouseOut);
+
                 drawBox=function(){
                     ftBox=document.createElement('dialog');
                     var boxStyle=document.createElement('style'),
@@ -167,20 +197,22 @@ require(config, modules,function(Css,Dom,Events,Menu){
                 ftBox.style.display='block';
             },
             onInspectingMouseOut=function(e){
-                Firebug.Console.log('REMOVE BOX:'+ftBox.tagName);
                 if(ftBox!==undefined){
-                    ftBox.removeEventListener("mousemove",onInspectingMouseMove,true);
+                    //ftBox.removeEventListener("mousemove",onInspectingMouseMove,true);
+                    evt.removeListener(ftBox,"mousemove",onInspectingMouseMove);
                     ftBox.style.display='none';
                 }
                 if(e.target.ownerDocument.defaultView.parent!==e.target.ownerDocument.defaultView){
-                    e.target.ownerDocument.defaultView.parent.document.addEventListener("mouseover",onInspectingMouseOver,true);
+                    //e.target.ownerDocument.defaultView.parent.document.addEventListener("mouseover",onInspectingMouseOver,true);
+                    evt.addListerner(e.target.ownerDocument.defaultView.parent.document,"mouseover",onInspectingMouseOver);
                 }
-                e.target.ownerDocument.removeEventListener("click",onInspectingClick,true);
+                //e.target.ownerDocument.removeEventListener("click",onInspectingClick,true);
+                evt.removeListener(e.target.ownerDocument,"click",onInspectingClick);
             },
             onInspectingMouseOver=function(e){
-                Firebug.Console.log(e.target.tagName);
                 Firebug.Inspector.highlightObject(e.target,context,HIGHLIGHTTYPE,BOXFRAME,"green");
-                e.target.ownerDocument.addEventListener("click",onInspectingClick,true);
+                //e.target.ownerDocument.addEventListener("click",onInspectingClick,true);
+                evt.addListerner(e.target.ownerDocument,"click",onInspectingClick);
  
                 var win = (e.target.ownerDocument ? e.target.ownerDocument.defaultView : null),
                     style=(frameDoc||e.currentTarget).defaultView.getComputedStyle(e.target,""),
@@ -194,13 +226,17 @@ require(config, modules,function(Css,Dom,Events,Menu){
                 
                 if(e.target.tagName==='IFRAME' || e.target.tagName==='FRAMESET'){
                     var frameDoc=e.target.contentWindow.document;
-                    frameDoc.addEventListener("mouseover",onInspectingMouseOver,true);
-                    frameDoc.addEventListener("mouseout",onInspectingMouseOut,true);
-                    e.target.contentWindow.parent.document.removeEventListener('mouseover',onInspectingMouseOver,true);
+                    //frameDoc.addEventListener("mouseover",onInspectingMouseOver,true);
+                    evt.addListerner(frameDoc,"mouseover",onInspectingMouseOver);
+                    //frameDoc.addEventListener("mouseout",onInspectingMouseOut,true);
+                    evt.addListerner(frameDoc,"mouseout",onInspectingMouseOut);
+                    //e.target.contentWindow.parent.document.removeEventListener('mouseover',onInspectingMouseOver,true);
+                    evt.removeListener(e.target.contentWindow.parent.document,'mouseover',onInspectingMouseOver);
 
                 }
                 
-                e.target.addEventListener("mousemove",onInspectingMouseMove,true);
+                //e.target.addEventListener("mousemove",onInspectingMouseMove,true);
+                evt.addListerner(e.target,"mousemove",onInspectingMouseMove);
                 drawBox({
                     title:(e.target.tagName+(e.target.id?('#'+e.target.id):'')),
                     css:boxStyle,
@@ -245,10 +281,14 @@ require(config, modules,function(Css,Dom,Events,Menu){
             hide=function(){
                 FBTrace.sysout("hidden");
                 Firebug.Console.log("hidden");
+                evt.removeAll();
+                evt.removeListener(document,"mouseover", onInspectingMouseOver);
+                 Firebug.Inspector.clearAllHighlights();
                 try{
-                    document.head.removeChild(styleSheet);
-                    Firebug.Inspector.clearAllHighlights();
-                    document.removeEventListener("mouseover", onInspectingMouseOver, true);
+                    //document.head.removeChild(styleSheet);
+                   
+                    //document.removeEventListener("mouseover", onInspectingMouseOver, true);
+                    
                 }catch(e){};
             };
         return{
