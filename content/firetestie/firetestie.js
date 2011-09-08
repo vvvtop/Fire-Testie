@@ -41,7 +41,7 @@ var evt=function(){
 }();    
 require(config, modules,function(Css,Dom,Events,Menu){
     fireTestiePanel.prototype = extend(Firebug.Panel,function(){
-        var document,readyTimeout,context,styleSheet,ftBox,tmpDoc,flag=false,lastDom,isAlt=false,multi,isMulti=false
+        var document,readyTimeout,context,styleSheet,ftBox,tmpDoc,flag=false,lastDom,isAlt=false,multi=[],isMulti=false
             drawBox=function(){},
             windowX=0,
             windowY=0,
@@ -92,6 +92,24 @@ require(config, modules,function(Css,Dom,Events,Menu){
                 document.addEventListener("mouseout",onInspectingMouseOut,true); */
                 evt.addListerner(document,"mouseover",onInspectingMouseOver);
                 evt.addListerner(document,"mouseout",onInspectingMouseOut);
+                evt.addListerner(document,"keydown",function(){
+                    var lastKeydown=0,
+                        tout=0;
+                    return function(e){
+                        if(e.keyCode===17){
+                            lastKeydown+=keyCode;
+                            if(lastKeydown===0){
+                                tout=setTimeout(function(){
+                                    if(lastKeydown%17===0 && lastKeydown>17){
+                                        isMulti=false;
+                                        lastKeydown=0;
+                                        Firebug.Inspector.clearAllHighlights();
+                                    }
+                                },700)
+                            }
+                        }
+                    };
+                }());
 
                 drawBox=function(){
                     if(!flag){
@@ -105,8 +123,19 @@ require(config, modules,function(Css,Dom,Events,Menu){
                     
                     return function(args){
                         ftBox.innerHTML='';
+                        Firebug.Console.log(args);
                         for(arg in args){
-                            var boxStyle=document.createElement('style'),
+                            var style=args[arg].ownerDocument.defaultView.getComputedStyle(args[arg],""),
+                                boxStyle=Css.readBoxStyles(style),
+                                fontStyles=readFontStyles(style),
+                                cssTableInner='<table><tbody>',
+                                offset = Dom.getLTRBWH(args[arg]),
+                                x = offset.left - Math.abs(boxStyle.marginLeft),
+                                y = offset.top - Math.abs(boxStyle.marginTop),
+                                w = offset.width - (boxStyle.paddingLeft + boxStyle.paddingRight + boxStyle.borderLeft + boxStyle.borderRight),
+                                h = offset.height - (boxStyle.paddingTop + boxStyle.paddingBottom + boxStyle.borderTop + boxStyle.borderBottom),
+                            
+                                styleSheet=document.createElement('style'),
                                 title=document.createElement('h1'),
                                 csstable=document.createElement('csstable'),
                                 layout=document.createElement('layout'),
@@ -118,32 +147,30 @@ require(config, modules,function(Css,Dom,Events,Menu){
                                 ftBox.appendChild(layout);
                                 ftBox.appendChild(clear);
                                 
-                                boxStyle.innerHTML='dialog dialog h1,dialog h2,dialog h3,dialog h4,dialog h5,dialog h6,dialog p,dialog hr,dialog article,dialog aside,dialog section,dialog figure,dialog footer,dialog header,dialogdl,dialog dt,dialog dd,dialog ul,dialog ol,dialog li,dialog th,dialog td,dialogform,dialog fieldset,dialog input,dialog button,dialog textarea,dialog *{margin:0;padding:0;}dialog header,dialog nav,dialog footer,dialog wrapper,dialog csstable,dialog marginbox,dialog contentbox,dialog paddingbox,dialog borderbox,dialog section{display:block;}dialog button,dialog input,dialog select,dialog textarea{font:12px/1 Tahoma,Arial;}dialog button,dialog h1,dialog h2,dialog h3,dialog h4,dialog h5,dialog h6{font-size:100%;font:normal 12px Tahoma,Arial;}dialog li{list-style:none;}dialog button,dialog input,dialog select,dialog textarea{font-size:100%;border:none;background:none;}dialog input:focus,dialog textarea:focus{outline:none;}dialog fieldset,dialog img{border:0 none;}dialog img{vertical-align:middle;}dialog table{border:0 none !important;margin:0 !important;padding:border-collapse:collapse;border-spacing:0;}dialog q:before,dialog q:after{content:"";}dialog address,dialog cite,dialog em{font-style:normal;}dialog{z-index:2147483647;border:1px solid #eee;display:block;position:absolute;top:200px;left:200px;width:490px;height:auto;-moz-border-radius:3px;-moz-box-shadow:0 0 10px rgba(0,0,0,0.2);background:#ededed;margin:0;padding:0;text-align:start;color:#333;font-family:Arial;font-size:11px;}layout{position:relative;width:100%;width:284px;float:left;}dialog h1{margin:0;padding:0;color:#F47A24;font-size:22px;font-weight:bold;font-family:Arial;line-height:140%;text-indent:5px;border-bottom:1px dashed #d5d5d5;height:31px;text-align:left;}csstable{font-size:11px;margin:7px auto auto 15px;border-right:1px dashed #d5d5d5;width:190px;float:left;}csstable tr{height:18px;}csstable .cssname{width:95px;font-weight:bold;}marginbox,contentbox,paddingbox,borderbox{margin:25px auto;}marginbox{width:200px;height:200px;border:1px dashed #000;}borderbox{width:150px;height:150px;border:1px dashed #000;}paddingbox{width:100px;height:100px;border:1px dashed #000;}contentbox{width:50px;height:50px;border:1px dashed #000;}.layout-figure{position:absolute;font-size:10px;}.figure_x{top:125px;}.figure_y{right:138px}.margin-left{right:219px;text-align:right;}.margin-right{left:220px;text-align:left;}.margin-top{top:37px;}.margin-bottom{top:205px;}.border-left{right:194px;text-align:right;}.border-right{left:194px;text-align:left;}.border-top{top:66px;}.border-bottom{top:179px;}.offset-left{right:245px;text-align:right;}.offset-right{left:245px;text-align:left;}.offset-top{top:13px;}.offset-bottom{top:230px;}.padding-left{right:170px;text-align:right;}.padding-right{left:170px;text-align:left;}.padding-top{top:92px;}.padding-bottom{top:156px;}.label-margin{top:30px;left:43px;}.label-border{top:54px;left:69px;}.label-padding{top:80px;left:95px;}.label-content{margin-top:20px;margin-left:auto;margin-right:auto;width:100%;hight:100%;display:block;text-align:center;}.label-offset{left:38px;top:13px;}';
+                                styleSheet.innerHTML='dialog dialog h1,dialog h2,dialog h3,dialog h4,dialog h5,dialog h6,dialog p,dialog hr,dialog article,dialog aside,dialog section,dialog figure,dialog footer,dialog header,dialogdl,dialog dt,dialog dd,dialog ul,dialog ol,dialog li,dialog th,dialog td,dialogform,dialog fieldset,dialog input,dialog button,dialog textarea,dialog *{margin:0;padding:0;}dialog header,dialog nav,dialog footer,dialog wrapper,dialog csstable,dialog marginbox,dialog contentbox,dialog paddingbox,dialog borderbox,dialog section{display:block;}dialog button,dialog input,dialog select,dialog textarea{font:12px/1 Tahoma,Arial;}dialog button,dialog h1,dialog h2,dialog h3,dialog h4,dialog h5,dialog h6{font-size:100%;font:normal 12px Tahoma,Arial;}dialog li{list-style:none;}dialog button,dialog input,dialog select,dialog textarea{font-size:100%;border:none;background:none;}dialog input:focus,dialog textarea:focus{outline:none;}dialog fieldset,dialog img{border:0 none;}dialog img{vertical-align:middle;}dialog table{border:0 none !important;margin:0 !important;padding:border-collapse:collapse;border-spacing:0;}dialog q:before,dialog q:after{content:"";}dialog address,dialog cite,dialog em{font-style:normal;}dialog{z-index:2147483647;border:1px solid #eee;display:block;position:absolute;top:200px;left:200px;width:490px;height:auto;-moz-border-radius:3px;-moz-box-shadow:0 0 10px rgba(0,0,0,0.2);background:#ededed;margin:0;padding:0;text-align:start;color:#333;font-family:Arial;font-size:11px;}layout{position:relative;width:100%;width:284px;float:left;}dialog h1{margin:0;padding:0;color:#F47A24;font-size:22px;font-weight:bold;font-family:Arial;line-height:140%;text-indent:5px;border-bottom:1px dashed #d5d5d5;height:31px;text-align:left;}csstable{font-size:11px;margin:7px auto auto 15px;border-right:1px dashed #d5d5d5;width:190px;float:left;}csstable tr{height:18px;}csstable .cssname{width:95px;font-weight:bold;}marginbox,contentbox,paddingbox,borderbox{margin:25px auto;}marginbox{width:200px;height:200px;border:1px dashed #000;}borderbox{width:150px;height:150px;border:1px dashed #000;}paddingbox{width:100px;height:100px;border:1px dashed #000;}contentbox{width:50px;height:50px;border:1px dashed #000;}.layout-figure{position:absolute;font-size:10px;}.figure_x{top:125px;}.figure_y{right:138px}.margin-left{right:219px;text-align:right;}.margin-right{left:220px;text-align:left;}.margin-top{top:37px;}.margin-bottom{top:205px;}.border-left{right:194px;text-align:right;}.border-right{left:194px;text-align:left;}.border-top{top:66px;}.border-bottom{top:179px;}.offset-left{right:245px;text-align:right;}.offset-right{left:245px;text-align:left;}.offset-top{top:13px;}.offset-bottom{top:230px;}.padding-left{right:170px;text-align:right;}.padding-right{left:170px;text-align:left;}.padding-top{top:92px;}.padding-bottom{top:156px;}.label-margin{top:30px;left:43px;}.label-border{top:54px;left:69px;}.label-padding{top:80px;left:95px;}.label-content{margin-top:20px;margin-left:auto;margin-right:auto;width:100%;hight:100%;display:block;text-align:center;}.label-offset{left:38px;top:13px;}';
                                
-                                ftBox.appendChild(boxStyle);
+                                ftBox.appendChild(styleSheet);
                                 ftBox.style.display='none';
                                 document.body.appendChild(ftBox);
-                            var cssTableInner='<table><tbody>',
-                                fontStyles=readFontStyles(args[arg].css),
-                                boxStyle=Css.readBoxStyles(args[arg].css);
+                             
                                 
                                 //clear float
                                 clear.style.clear='both';
                                 //Firebug.Console.log(boxStyle);
                             
-                            title.innerHTML=args[arg].title || 'N/A';
+                            title.innerHTML=args[arg].tagName || 'N/A';
                             
                             if(fontStyles){
                                for(var ele in fontStyles){
-                                    cssTableInner+=('<tr><td class="cssname">'+ele+'</td><td>'+args[arg].css[ele]+'</td></tr>');
+                                    cssTableInner+=('<tr><td class="cssname">'+ele+'</td><td>'+fontStyles[ele]+'</td></tr>');
                                 } 
                             }
                             cssTableInner+='</tbody></table>';
                             csstable.innerHTML=cssTableInner;
                             //Math.ceil(1.3)
-                            layout.innerHTML='<span class="layout-figure offset-left figure_x" id="">'+Math.ceil(args[arg].x)+'</span>'+
+                            layout.innerHTML='<span class="layout-figure offset-left figure_x" id="">'+Math.ceil(x)+'</span>'+
                                          '<span class="layout-figure offset-right figure_x" id="">0</span>'+
-                                         '<span class="layout-figure offset-top figure_y" id="">'+Math.ceil(args[arg].y)+'</span>'+
+                                         '<span class="layout-figure offset-top figure_y" id="">'+Math.ceil(y)+'</span>'+
                                          '<span class="layout-figure offset-bottom figure_y" id="">0</span>'+
                                          '<span class="layout-figure margin-left figure_x" id="">'+Math.ceil(boxStyle['marginLeft'])+'</span>'+
                                          '<span class="layout-figure margin-right figure_x" id="">'+Math.ceil(boxStyle['marginRight'])+'</span>'+
@@ -162,7 +189,7 @@ require(config, modules,function(Css,Dom,Events,Menu){
                                          '<span class="layout-figure label-padding" id="">Padding</span>'+
                                          '<span class="layout-figure label-offset" id="">offset</span>'+
                                          '<marginbox><borderbox><paddingbox><contentbox>'+
-                                         '<span class="label-content" id="">'+Math.ceil(args[arg].w)+'*'+Math.ceil(args[arg].h)+'</span>'+
+                                         '<span class="label-content" id="">'+Math.ceil(w)+'*'+Math.ceil(h)+'</span>'+
                                          '</contentbox></paddingbox></borderbox></marginbox>';
                             //ftBox=inner;
                         }
@@ -191,7 +218,7 @@ require(config, modules,function(Css,Dom,Events,Menu){
 
                 var styles = {};
                 for (var styleName in styleNames){
-                    styles[styleNames[styleName]] = parseInt(style.getPropertyCSSValue(styleName).cssText) || 0;
+                    styles[styleNames[styleName]] = (style.getPropertyCSSValue(styleName).cssText) || '';
                 }
                     
 
@@ -222,24 +249,7 @@ require(config, modules,function(Css,Dom,Events,Menu){
                         Firebug.Console.log('ctrl+mouse1');
                 } */
                 if(e.ctrlKey){
-                    var win = (e.target.ownerDocument ? e.target.ownerDocument.defaultView : null),
-                        style=e.currentTarget.defaultView.getComputedStyle(e.target,""),
-                        boxStyle=Css.readBoxStyles(style),
-                        cssTableInner="",
-                        offset = Dom.getLTRBWH(e.target),
-                        x = offset.left - Math.abs(boxStyle.marginLeft),
-                        y = offset.top - Math.abs(boxStyle.marginTop),
-                        w = offset.width - (boxStyle.paddingLeft + boxStyle.paddingRight + boxStyle.borderLeft + boxStyle.borderRight),
-                        h = offset.height - (boxStyle.paddingTop + boxStyle.paddingBottom + boxStyle.borderTop + boxStyle.borderBottom); 
-                        multi.element=e.target;
-                        multi.drawArgs={
-                            title:(e.target.tagName+(e.target.id?('#'+e.target.id):'')),
-                            css:style,
-                            x:x,
-                            y:y,
-                            w:w,
-                            h:h
-                        };
+                    multi.push(e.target);
                     Firebug.Console.log('CTRL-CLICK');
                 }
                 Firebug.Console.log(e);
@@ -311,7 +321,7 @@ require(config, modules,function(Css,Dom,Events,Menu){
                 
                 //e.target.addEventListener("mousemove",onInspectingMouseMove,true);
                 evt.addListerner(e.target,"mousemove",onInspectingMouseMove);
-                if(multi==={}){
+                /* if(multi==={}){
                     drawBox([
                         {
                             title:(e.target.tagName+(e.target.id?('#'+e.target.id):'')),
@@ -334,7 +344,9 @@ require(config, modules,function(Css,Dom,Events,Menu){
                         },
                         multi.drawArgs
                     ]);
-                }
+                } */
+                
+                drawBox([e.target]);
                 
                 
 
