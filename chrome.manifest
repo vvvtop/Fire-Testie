@@ -1,3 +1,3 @@
 content firetestie content/firetestie/ xpcnativewrappers=no
-overlay chrome://firebug/content/firebugOverlay.xul         chrome://firetestie/content/firetestie.xul
+overlay chrome://firebug/content/firebugOverlay.xul chrome://firetestie/content/firetestie.xul
 resource firetestie_r content/firetestie/include/ 

@@ -220,6 +220,7 @@ contentbox {
     width: 298px !important; 
     height: 212px !important;
     opacity:0.85 !important;
+    text-align:center !important;
 }
 #pbox .wrapper{
     width:100% !important;
