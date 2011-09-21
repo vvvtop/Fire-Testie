@@ -1,4 +1,15 @@
 var FireTestie = {};
+var boxModelHighlighter = null;
+var frameHighlighter = null;
+const inspectDelay = 200;
+var _highlightObject_old = function () {
+    var re = Firebug.Inspector.highlightObject;
+    return function () {
+        return re;
+    }
+}
+();
+
 FBL.ns(function () {
         with (FBL) {
             var HIGHLIGHTTYPE = 'boxModel',
@@ -13,7 +24,8 @@ FBL.ns(function () {
                 "firebug/lib/dom",
                 "firebug/lib/events",
                 "firebug/firefox/menu",
-                "firebug/firefox/tabWatcher"
+                "firebug/lib/wrapper",
+                "firebug/lib/xml"
             ],
             fireTestiePanel = function () {},
             undefined;
@@ -45,8 +57,135 @@ FBL.ns(function () {
             var log = function (ele) {
                 Firebug.Console.log(ele);
             };
-            require(config, modules, function (Css, Dom, Events, Menu) {
+            require(config, modules, function (Css, Dom, Events, Menu, Wrapper, Xml) {
                     fireTestiePanel.prototype = FBL.extend(Firebug.Panel, function () {
+                                function isVisibleElement(elt) {
+                                    var invisibleElements = {
+                                        "head" : true,
+                                        "base" : true,
+                                        "basefont" : true,
+                                        "isindex" : true,
+                                        "link" : true,
+                                        "meta" : true,
+                                        "script" : true,
+                                        "style" : true,
+                                        "title" : true
+                                    };
+                                    
+                                    return !invisibleElements[elt.nodeName.toLowerCase()];
+                                }
+                                
+                                function storeHighlighterParams(highlighter, context, element, boxFrame, colorObj,
+                                    highlightType, isMulti) {
+                                    var fir = Firebug.Inspector.repaint;
+                                    
+                                    fir.highlighter = highlighter;
+                                    fir.context = context;
+                                    fir.element = element;
+                                    fir.boxFrame = boxFrame;
+                                    fir.colorObj = colorObj;
+                                    fir.highlightType = highlightType;
+                                    fir.isMulti = isMulti;
+                                    
+                                    Firebug.Inspector.highlightedContext = context;
+                                }
+                                function getHighlighter(type) {
+                                    if (type == "boxModel") {
+                                        if (!boxModelHighlighter)
+                                            boxModelHighlighter = new Firebug.Inspector.BoxModelHighlighter();
+                                        
+                                        return boxModelHighlighter;
+                                    } else if (type == "frame") {
+                                        if (!frameHighlighter)
+                                            frameHighlighter = new Firebug.Inspector.FrameHighlighter();
+                                        
+                                        return frameHighlighter;
+                                    }
+                                }
+                                var _highlightObject = function (elementArr, context, highlightType, boxFrame, colorObj) {
+                                    var i,
+                                    elt,
+                                    elementLen,
+                                    oldContext,
+                                    usingColorArray;
+                                    var highlighter = highlightType ? getHighlighter(highlightType) : this.defaultHighlighter;
+                                    
+                                    if (!elementArr || !FirebugReps.Arr.isArray(elementArr)) {
+                                        // highlight a single element
+                                        if (!elementArr || !Dom.isElement(elementArr) ||
+                                            (Wrapper.getContentView(elementArr) &&
+                                                !Xml.isVisible(Wrapper.getContentView(elementArr)))) {
+                                            if (elementArr && elementArr.nodeType == 3)
+                                                elementArr = elementArr.parentNode;
+                                            else
+                                                elementArr = null;
+                                        }
+                                        
+                                        if (elementArr && context && context.highlightTimeout) {
+                                            context.clearTimeout(context.highlightTimeout);
+                                            delete context.highlightTimeout;
+                                        }
+                                        
+                                        oldContext = this.highlightedContext;
+                                        if (oldContext && oldContext.window)
+                                            this.clearAllHighlights();
+                                        
+                                        // Stop multi element highlighting
+                                        if (!elementArr)
+                                            this.repaint.element = null;
+                                        
+                                        this.highlighter = highlighter;
+                                        this.highlightedContext = context;
+                                        
+                                        if (elementArr) {
+                                            if (!isVisibleElement(elementArr))
+                                                highlighter.unhighlight(context);
+                                            else if (context && context.window && context.window.document)
+                                                highlighter.highlight(context, elementArr, boxFrame, colorObj, false);
+                                        } else if (oldContext) {
+                                            oldContext.highlightTimeout = oldContext.setTimeout(function () {
+                                                        if (FBTrace.DBG_INSPECT)
+                                                            FBTrace.sysout("Removing inspector highlighter due to setTimeout loop");
+                                                        
+                                                        delete oldContext.highlightTimeout;
+                                                        
+                                                        if (oldContext.window && oldContext.window.document) {
+                                                            highlighter.unhighlight(oldContext);
+                                                            
+                                                            if (oldContext.inspectorMouseMove)
+                                                                oldContext.window.document.removeEventListener("mousemove",
+                                                                    oldContext.inspectorMouseMove, true);
+                                                        }
+                                                    }, inspectDelay);
+                                        }
+                                    } else {
+                                        // Highlight multiple elements
+                                        if (context && context.highlightTimeout) {
+                                            context.clearTimeout(context.highlightTimeout);
+                                            delete context.highlightTimeout;
+                                        }
+                                        this.clearAllHighlights();
+                                        usingColorArray = FirebugReps.Arr.isArray(colorObj);
+                                        
+                                        if (context && context.window && context.window.document) {
+                                            for (i = 0, elementLen = elementArr.length; i < elementLen; i++) {
+                                                elt = elementArr[i];
+                                                
+                                                if (elt && elt instanceof HTMLElement) {
+                                                    if (elt.nodeType === 3)
+                                                        elt = elt.parentNode;
+                                                    
+                                                    if (usingColorArray)
+                                                        highlighter.highlight(context, elt, boxFrame, colorObj[i], true);
+                                                    else
+                                                        highlighter.highlight(context, elt, boxFrame, colorObj, true);
+                                                }
+                                            }
+                                        }
+                                        
+                                        storeHighlighterParams(null, context, elementArr, boxFrame, colorObj, highlightType, true);
+                                    }
+                                }
                                 var document,
                                 readyTimeout,
                                 context,
@@ -501,12 +640,14 @@ FBL.ns(function () {
                                     highlightObject([e.target,multi],context,HIGHLIGHTTYPE,BOXFRAME,"green",true);
                                     } */
                                     if (multi.length === 0) {
-                                        Firebug.Inspector.
-                                        highlightObject(e.target, context, HIGHLIGHTTYPE, BOXFRAME, "#FCFFA7", true);
+                                        /* Firebug.Inspector.
+                                        highlightObject(e.target, context, HIGHLIGHTTYPE, BOXFRAME, "#FCFFA7", true); */
+                                        _highlightObject.call(Firebug.Inspector, e.target, context, HIGHLIGHTTYPE, BOXFRAME, "#FCFFA7", true);
                                     } else {
                                         log(multi);
-                                        Firebug.Inspector.
-                                        highlightObject(multi, context, HIGHLIGHTTYPE, BOXFRAME, "#FCFFA7", true);
+                                        /* Firebug.Inspector.
+                                        highlightObject(multi, context, HIGHLIGHTTYPE, BOXFRAME, ["#FCFFA7",'green'], true); */
+                                        _highlightObject.call(Firebug.Inspector, multi, context, HIGHLIGHTTYPE, BOXFRAME, ["#FCFFA7", 'green'], true);
                                     }
                                     
                                     //e.target.ownerDocument.addEventListener("click",onInspectingClick,true);
@@ -643,7 +784,10 @@ FBL.ns(function () {
                                                 onEnabledBtnClick : function (e) {
                                                     var target = e.target;
                                                     //target.disabled='true';
-                                                    
+                                                    function lalala() {
+                                                        log(this);
+                                                    }
+                                                    lalala.call(Firebug.Inspector.BoxModelHighlighter);
                                                     if (target.value === 'Enabled') {
                                                         ready();
                                                         target.setAttribute('value', 'Disabled');
@@ -655,21 +799,24 @@ FBL.ns(function () {
                                                     }
                                                     
                                                 },
-
-                                                table:
-                                                    TABLE({
-                                                        style:'border-collapse:collapse;border-spacing:0;margin-top:20px;',
-                                                    className:'ma', width: "80%"},
-                                                        FOR("item", "array",
-                                                            TAG("$row", {name: "$item"})
-                                                        )
-                                                    ),
-                                             
-                                                row:
-                                                    TR({style:'text-align:center'},
-                                                        TD("$name"),
-                                                        TD("$name")
-                                                    )
+                                                
+                                                table :
+                                                TABLE({
+                                                        style : 'border-collapse:collapse;border-spacing:0;margin-top:20px;',
+                                                        className : 'ma',
+                                                        width : "80%"
+                                                    },
+                                                    FOR("item", "array",
+                                                        TAG("$row", {
+                                                                name : "$item"
+                                                            }))),
+                                                
+                                                row :
+                                                TR({
+                                                        style : 'text-align:center'
+                                                    },
+                                                    TD("$name"),
+                                                    TD("$name"))
                                             });
                                     
                                     var panel = context.getPanel('FireTestie');
@@ -677,20 +824,22 @@ FBL.ns(function () {
                                     var parentNode = panel.panelNode;
                                     var rootTemplateElement = textWrapper.mainWrapper.replace({}, parentNode, textWrapper);
                                     EnableBtnElement = textWrapper.EnableBtn.append(EnableBtnElement, rootTemplateElement, textWrapper);
-                                    var la=match();
-                                    matchTable= textWrapper.table.append({array: la}, rootTemplateElement, textWrapper);
+                                    var la = match();
+                                    matchTable = textWrapper.table.append({
+                                                array : la
+                                            }, rootTemplateElement, textWrapper);
                                     //log(EnableBtnElement);
                                     //Firebug.match="";
-                                    var tableTmp='<tr style="border-top:2px solid #000;"><th colspan="2" style="font-size:20px;font-weight:bold;">Firetestie.JSON</th></tr>';
+                                    var tableTmp = '<tr style="border-top:2px solid #000;"><th colspan="2" style="font-size:20px;font-weight:bold;">Firetestie.JSON</th></tr>';
                                     
-                                    for(var i in la){
-                                        tableTmp+=('<tr style="text-align:start;border-bottom:1px solid #333;"><td style="width:12%;border-right:1px dashed #333;padding-left:7px;padding-top:3px;padding-bottom:3px;">'+i+'</td><td style="padding-left:7px;padding-top:3px;padding-bottom:3px;">'+JSON.stringify(la[i])+'</td>');
+                                    for (var i in la) {
+                                        tableTmp += ('<tr style="text-align:start;border-bottom:1px solid #333;"><td style="width:12%;border-right:1px dashed #333;padding-left:7px;padding-top:3px;padding-bottom:3px;">' + i + '</td><td style="padding-left:7px;padding-top:3px;padding-bottom:3px;">' + JSON.stringify(la[i]) + '</td>');
                                     }
                                     
-                                    matchTable.innerHTML=tableTmp;
+                                    matchTable.innerHTML = tableTmp;
                                     
                                 },
-                                matchTable=null,
+                                matchTable = null,
                                 match = function () {
                                     var obj = {};
                                     return function (param) {
