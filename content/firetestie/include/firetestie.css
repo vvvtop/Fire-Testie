@@ -214,12 +214,13 @@ contentbox {
 
 .pbox{
     -moz-box-shadow:0 0 10px rgba(0,0,0,0.2) !important;
-    position: fixed; top: 0px !important; 
-    left: 0px !important; 
+    position: fixed !important; 
+    top: 0px !important; 
+    right: 298px !important; 
     background: url("resource://firetestie_r/box.png") no-repeat scroll 0% 0% #fff !important; 
     width: 298px !important; 
     height: 212px !important;
-    opacity:0.85 !important;
+    opacity:0.65 !important;
     text-align:center !important;
 }
 #pbox .wrapper{
@@ -242,13 +243,17 @@ contentbox {
     
     
 }
+
 #pbox .tag_a{
     left:8px !important;
     top:25px !important;
+    background:#FCFFA7 !important;
+    color:#333 !important;
 }
 #pbox .tag_b{
     left:188px !important;
     top:172px !important;
+    background:green !important;
     
 }
 #pbox .d1{
