@@ -41,14 +41,14 @@ dialog q:before,dialog q:after {
 dialog address,dialog cite,dialog em {
 	font-style:normal;
 }
-dialog {
+dialog{
 	z-index:2147483647;
 	border:1px solid #eee;
 	display:block;
 	position:absolute;
 	top:200px;
 	left:200px;
-	width:490px;
+	
 	height:auto;
 	-moz-border-radius:3px;
 	-moz-box-shadow:0 0 10px rgba(0,0,0,0.2);
@@ -59,6 +59,12 @@ dialog {
 	color:#333;
 	font-family:Arial;
 	font-size:11px;
+}
+dialog .mod1{
+    width:490px;
+}
+dialog .mod2{
+    width:400px;
 }
 layout {
 	position:relative;
@@ -95,6 +101,11 @@ csstable tr {
 csstable .cssname {
 	width:102px;
 	font-weight:bold;
+}
+csstable .cssval {
+	table-layout:fixed;
+    word-break:break-all; 
+    word-wrap:break-word;
 }
 marginbox,contentbox,paddingbox,borderbox {
 	margin:17px auto;
@@ -216,7 +227,7 @@ contentbox {
     -moz-box-shadow:0 0 10px rgba(0,0,0,0.2) !important;
     position: fixed !important; 
     top: 0px !important; 
-    right: 298px !important; 
+    right: 0px !important; 
     background: url("resource://firetestie_r/box.png") no-repeat scroll 0% 0% #fff !important; 
     width: 298px !important; 
     height: 212px !important;
@@ -275,4 +286,8 @@ contentbox {
     left:39px !important;
     top:172px !important;
     
+}
+.match{
+    margin-left:9px;
+    color:#fff;
 }
