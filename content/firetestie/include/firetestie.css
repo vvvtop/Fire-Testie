@@ -224,20 +224,18 @@ contentbox {
 /*pbox*/
 
 .pbox{
-    -moz-box-shadow:0 0 10px rgba(0,0,0,0.2) !important;
-    position: fixed !important; 
-    top: 0px !important; 
-    right: 0px !important; 
-    background: url("resource://firetestie_r/box.png") no-repeat scroll 0% 0% #fff !important; 
-    width: 298px !important; 
-    height: 212px !important;
-    opacity:0.65 !important;
-    text-align:center !important;
+    -moz-box-shadow:0 0 10px rgba(0,0,0,0.2) ;
+    position: fixed ; 
+    background: url("resource://firetestie_r/box.png") no-repeat scroll 0% 0% #fff ; 
+    width: 298px ; 
+    height: 212px ;
+    opacity:0.65 ;
+    text-align:center ;
 }
 #pbox .wrapper{
-    width:100% !important;
-    height:100% !important;
-    position:relative !important;
+    width:100% ;
+    height:100% ;
+    position:relative ;
     
 }
 #pbox .tag_a,#pbox .tag_b,
@@ -245,46 +243,46 @@ contentbox {
 #pbox .d3,#pbox .d4
 
 {
-    position:absolute !important;
-    height:20px !important;
-    width:100px !important;
-    line-height:20px !important;
-    background:#112435 !important;
-    color:#fff !important;
+    position:absolute ;
+    height:20px ;
+    width:100px ;
+    line-height:20px ;
+    background:#112435 ;
+    color:#fff ;
     
     
 }
 
 #pbox .tag_a{
-    left:8px !important;
-    top:25px !important;
-    background:#FCFFA7 !important;
-    color:#333 !important;
+    left:8px ;
+    top:25px ;
+    background:#FCFFA7 ;
+    color:#333 ;
 }
 #pbox .tag_b{
-    left:188px !important;
-    top:172px !important;
-    background:green !important;
+    left:188px ;
+    top:172px ;
+    background:green ;
     
 }
 #pbox .d1{
-    left:148px !important;
-    top:6px !important;
+    left:148px ;
+    top:6px ;
     
 }
 #pbox .d2{
-    left:126px !important;
-    top:73px !important;
+    left:126px ;
+    top:73px ;
     
 }
 #pbox .d3{
-    left:77px !important;
-    top:117px !important;
+    left:77px ;
+    top:117px ;
     
 }
 #pbox .d4{
-    left:39px !important;
-    top:172px !important;
+    left:39px ;
+    top:172px ;
     
 }
 .match{
