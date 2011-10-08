@@ -209,31 +209,6 @@ FBL.ns(function () {
                                             this.dragging = true;
                                             this.prevX = event.screenX;
                                             this.prevY = event.screenY;
-<<<<<<< HEAD
-=======
-                                            break;
-                                        case "mouseup":
-                                            this.qiPanel.removeEventListener('mousemove', this, true);
-                                            this.qiPanel.removeEventListener('mouseup', this, true);
-                                            this.qiPanel = this.qiBox = null;
-                                            this.prevX = this.prevY = null;
-                                            this.dragging = false;
-                                            break;
-                                            // this is a hack to find when mouse enters and leaves panel
-                                            // it requires that #fbQuickInfoPanel have border
-                                        case "mouseover":
-                                            if (this.dragging)
-                                                return;
-                                            this.mouseover = true;
-                                            break;
-                                        case "mouseout":
-                                            if (this.dragging)
-                                                return;
-                                            this.mouseover = false;
-                                            // if hiding was defered because mouse was over panel hide it
-                                            if (this.needsToHide && event.target.nodeName == 'panel')
-                                                this.hide();
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                             break;
                                         case "mouseup":
                                             this.qiPanel.removeEventListener('mousemove', this, true);
@@ -449,200 +424,6 @@ FBL.ns(function () {
                                             moveImp(nodes.lines.bottom, 0, top + height);
                                             moveImp(nodes.lines.left, left, 0)
                                         }
-<<<<<<< HEAD
-=======
-                                    },
-                                    
-                                    addRows : function (domBase, vbox, attribs, computedStyle) {
-                                        if (!domBase)
-                                            return;
-                                        
-                                        var i,
-                                        cs,
-                                        desc,
-                                        hbox,
-                                        lab,
-                                        value,
-                                        needsTitle = false,
-                                        attribsLen = attribs.length;
-                                        
-                                        for (i = 0; i < attribsLen; i++) {
-                                            if (computedStyle) {
-                                                cs = getNonFrameBody(domBase).ownerDocument.defaultView.getComputedStyle(domBase, null);
-                                                value = cs.getPropertyValue(attribs[i]);
-                                                
-                                                if (value && /rgb\(\d+,\s\d+,\s\d+\)/.test(value))
-                                                    value = rgbToHex(value);
-                                            } else
-                                                value = domBase[attribs[i]];
-                                            
-                                            if (value) {
-                                                needsTitle = true;
-                                                hbox = document.createElement("hbox");
-                                                lab = document.createElement("label");
-                                                lab.setAttribute("class", "fbQuickInfoName");
-                                                lab.setAttribute("value", attribs[i]);
-                                                hbox.appendChild(lab);
-                                                desc = document.createElement("description");
-                                                desc.setAttribute("class", "fbQuickInfoValue");
-                                                desc.appendChild(document.createTextNode(": " + value));
-                                                hbox.appendChild(desc);
-                                                vbox.appendChild(hbox);
-                                            }
-                                        }
-                                        
-                                        return needsTitle;
-                                    }
-                                };
-                                function moveImp(element, x, y) {
-                                    var css = 'left:' + x + 'px !important;top:' + y + 'px !important;';
-                                    
-                                    if (element)
-                                        element.style.cssText = css;
-                                    else
-                                        return css;
-                                }
-                                function resizeImp(element, w, h) {
-                                    var css = 'width:' + w + 'px !important;height:' + h + 'px !important;';
-                                    
-                                    if (element)
-                                        element.style.cssText = css;
-                                    else
-                                        return css;
-                                }
-                                function getNonFrameBody(elt) {
-                                    var body = Dom.getBody(elt.ownerDocument);
-                                    return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
-                                }
-                                function pad(element, t, r, b, l) {
-                                    var css = 'padding:' + Math.abs(t) + "px " + Math.abs(r) + "px "
-                                         + Math.abs(b) + "px " + Math.abs(l) + "px !important;";
-                                    
-                                    if (element)
-                                        element.style.cssText = css;
-                                    else
-                                        return css;
-                                }
-                                function attachStyles(context, body) {
-                                    var doc = body.ownerDocument;
-                                    if (!context.highlightStyle || context.highlightStyle.ownerDocument !== doc)
-                                        context.highlightStyle = Css.createStyleSheet(doc, highlightCSS);
-                                    
-                                    if (!context.highlightStyle.parentNode || context.highlightStyle.ownerDocument != doc)
-                                        Css.addStyleSheet(body.ownerDocument, context.highlightStyle);
-                                }
-                                Firebug.Inspector.BoxModelHighlighter.prototype.highlight = function (context, element, boxFrame, colorObj, isMulti) {
-                                    var line,
-                                    contentCssText,
-                                    paddingCssText,
-                                    borderCssText,
-                                    marginCssText,
-                                    nodes = this.getNodes(context, isMulti),
-                                    highlightFrame = boxFrame ? nodes[boxFrame] : null;
-                                    
-                                    // if a single color was passed in lets use it as the content box color
-                                    if (typeof colorObj === "string")
-                                        colorObj = {
-                                            content : colorObj,
-                                            padding : "SlateBlue",
-                                            border : "#444444",
-                                            margin : "#EDFF64"
-                                        };
-                                    else
-                                        colorObj = colorObj || {
-                                                content : "SkyBlue",
-                                                padding : "SlateBlue",
-                                                border : "#444444",
-                                                margin : "#EDFF64"
-                                            };
-                                    
-                                    Firebug.Inspector.attachRepaintInspectListeners(element);
-                                    storeHighlighterParams(this, context, element, boxFrame, colorObj, null, isMulti);
-                                    
-                                    if (context.highlightFrame)
-                                        Css.removeClass(context.highlightFrame, "firebugHighlightBox");
-                                    
-                                    if (element.tagName !== "AREA") {
-                                        this.ihl && this.ihl.show(false);
-                                        
-                                        quickInfoBox.show(element);
-                                        context.highlightFrame = highlightFrame;
-                                        
-                                        if (highlightFrame) {
-                                            Css.setClass(nodes.offset, "firebugHighlightGroup");
-                                            Css.setClass(highlightFrame, "firebugHighlightBox");
-                                        } else
-                                            Css.removeClass(nodes.offset, "firebugHighlightGroup");
-                                        
-                                        var win = (element.ownerDocument ? element.ownerDocument.defaultView : null);
-                                        if (!win)
-                                            return;
-                                        
-                                        var style = win.getComputedStyle(element, "");
-                                        if (!style) {
-                                            if (FBTrace.DBG_INSPECT)
-                                                FBTrace.sysout("highlight: no style for element " + element, element);
-                                            return;
-                                        }
-                                        
-                                        var styles = Css.readBoxStyles(style);
-                                        var offset = Dom.getLTRBWH(element);
-                                        var x = offset.left - Math.abs(styles.marginLeft);
-                                        var y = offset.top - Math.abs(styles.marginTop);
-                                        var w = offset.width - (styles.paddingLeft + styles.paddingRight + styles.borderLeft + styles.borderRight);
-                                        var h = offset.height - (styles.paddingTop + styles.paddingBottom + styles.borderTop + styles.borderBottom);
-                                        
-                                        moveImp(nodes.offset, x, y);
-                                        marginCssText = pad(null, styles.marginTop, styles.marginRight, styles.marginBottom, styles.marginLeft);
-                                        borderCssText = pad(null, styles.borderTop, styles.borderRight, styles.borderBottom, styles.borderLeft);
-                                        paddingCssText = pad(null, styles.paddingTop, styles.paddingRight, styles.paddingBottom, styles.paddingLeft);
-                                        contentCssText = resizeImp(null, w, h);
-                                        
-                                        // element.tagName !== "BODY" for issue 2447. hopefully temporary, robc
-                                        var showLines = Firebug.showRulers && boxFrame && element.tagName !== "BODY";
-                                        if (showLines) {
-                                            var offsetParent = element.offsetParent;
-                                            
-                                            if (offsetParent)
-                                                this.setNodesByOffsetParent(win, offsetParent, nodes);
-                                            
-                                            var left = x;
-                                            var top = y;
-                                            var width = w - 1;
-                                            var height = h - 1;
-                                            
-                                            if (boxFrame == "content") {
-                                                left += Math.abs(styles.marginLeft) + Math.abs(styles.borderLeft)
-                                                 + Math.abs(styles.paddingLeft);
-                                                top += Math.abs(styles.marginTop) + Math.abs(styles.borderTop)
-                                                 + Math.abs(styles.paddingTop);
-                                            } else if (boxFrame == "padding") {
-                                                left += Math.abs(styles.marginLeft) + Math.abs(styles.borderLeft);
-                                                top += Math.abs(styles.marginTop) + Math.abs(styles.borderTop);
-                                                width += Math.abs(styles.paddingLeft) + Math.abs(styles.paddingRight);
-                                                height += Math.abs(styles.paddingTop) + Math.abs(styles.paddingBottom);
-                                            } else if (boxFrame == "border") {
-                                                left += Math.abs(styles.marginLeft);
-                                                top += Math.abs(styles.marginTop);
-                                                width += Math.abs(styles.paddingLeft) + Math.abs(styles.paddingRight)
-                                                 + Math.abs(styles.borderLeft) + Math.abs(styles.borderRight);
-                                                height += Math.abs(styles.paddingTop) + Math.abs(styles.paddingBottom)
-                                                 + Math.abs(styles.borderTop) + Math.abs(styles.borderBottom);
-                                            } else if (boxFrame == "margin") {
-                                                width += Math.abs(styles.paddingLeft) + Math.abs(styles.paddingRight)
-                                                 + Math.abs(styles.borderLeft) + Math.abs(styles.borderRight)
-                                                 + Math.abs(styles.marginLeft) + Math.abs(styles.marginRight);
-                                                height += Math.abs(styles.paddingTop) + Math.abs(styles.paddingBottom)
-                                                 + Math.abs(styles.borderTop) + Math.abs(styles.borderBottom)
-                                                 + Math.abs(styles.marginTop) + Math.abs(styles.marginBottom);
-                                            }
-                                            
-                                            moveImp(nodes.lines.top, 0, top);
-                                            moveImp(nodes.lines.right, left + width, 0);
-                                            moveImp(nodes.lines.bottom, 0, top + height);
-                                            moveImp(nodes.lines.left, left, 0)
-                                        }
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                         
                                         var body = getNonFrameBody(element);
                                         if (!body)
@@ -784,19 +565,11 @@ FBL.ns(function () {
                                         });
                                 }
                                 var query,
-<<<<<<< HEAD
                                 
                                 document,
                                 
                                 readyTimeout,
                                 
-=======
-                                
-                                document,
-                                
-                                readyTimeout,
-                                
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                 context,
                                 
                                 styleSheet,
@@ -852,34 +625,12 @@ FBL.ns(function () {
                                     var lastKeydown = false,
                                     tout = 0;
                                     return function (e) {
-<<<<<<< HEAD
 
                                         if (e.keyCode === 17) {
-=======
-                                        /* if(e.keyCode===17){
-                                        lastKeydown+=keyCode;
-                                        if(lastKeydown===0){
-                                        tout=setTimeout(function(){
-                                        if(lastKeydown%17===0 && lastKeydown>17){
-                                        isMulti=false;
-                                        lastKeydown=0;
-                                        Firebug.Inspector.clearAllHighlights();
-                                        }
-                                        },700)
-                                        }
-                                        } */
-                                        if (e.keyCode === 17) {
-                                            //document.addEventListener("click",clickBody,true);
-                                            log('按下ctrl,lastKeydown=' + (lastKeydown ? 'true' : 'false'));
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                             if (!isMulti) {
                                                 isMulti = true;
                                             } else {
                                                 if (lastKeydown) {
-<<<<<<< HEAD
-=======
-                                                    log('1s内连续敲击了两次');
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                                     multi = [];
                                                     Firebug.Inspector.clearAllHighlights();
                                                     isMulti = false;
@@ -924,25 +675,10 @@ FBL.ns(function () {
                                             windowX = document.documentElement.clientWidth;
                                             windowY = document.documentElement.clientHeight;
                                         });
-<<<<<<< HEAD
                                     context = Firebug.currentContext;
 
                                     evt.addListerner(document, "mouseover", onInspectingMouseOver);
                                     evt.addListerner(document, "mouseout", onInspectingMouseOut);
-=======
-                                    /* document.defaultView.addEventListener("resize",function(e){
-                                    windowX=document.documentElement.clientWidth;
-                                    windowY=document.documentElement.clientHeight;
-                                    },true); */
-                                    
-                                    context = Firebug.currentContext;
-                                    
-                                    /* document.addEventListener("mouseover",onInspectingMouseOver,true);
-                                    document.addEventListener("mouseout",onInspectingMouseOut,true); */
-                                    evt.addListerner(document, "mouseover", onInspectingMouseOver);
-                                    evt.addListerner(document, "mouseout", onInspectingMouseOut);
-                                    //evt.addListerner(document,"keydown",function(){
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                     function clickBody(e) {
                                         //这里不能使用任何阻塞的代码……要不然会不能正常注销
                                         log('组合键 CLICK >3<');
@@ -955,17 +691,6 @@ FBL.ns(function () {
                                     }
                                     evt.addListerner(document, 'keydown', onAlt);
                                     evt.addListerner(document, "keyup", onHotKeyUp);
-<<<<<<< HEAD
-=======
-                                    /* document.addEventListener('keyup',function(e){
-                                    //if(e.ctrlKey){
-                                    multi=[];
-                                    Firebug.Inspector.clearAllHighlights();
-                                    isMulti=false;
-                                    //document.removeEventListener("click",clickBody,true);
-                                    //}
-                                    },true); */
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                     
                                     drawBox = function () {
                                         if (!flag) {
@@ -983,10 +708,6 @@ FBL.ns(function () {
                                         }
                                         function doDrawBox(args) {
                                             ftBox.innerHTML = '';
-<<<<<<< HEAD
-=======
-                                            //Firebug.Console.log(args);
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                             for (arg in args) {
                                                 var style = args[arg].ownerDocument.defaultView
                                                     .getComputedStyle(args[arg], ""),
@@ -1003,10 +724,6 @@ FBL.ns(function () {
                                                         boxStyle.paddingBottom + boxStyle.borderTop +
                                                         boxStyle.borderBottom),
                                                 
-<<<<<<< HEAD
-=======
-                                                //styleSheet=document.createElement('style'),
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                                 styleSheet = document.createElement('link'),
                                                 title = document.createElement('h1'),
                                                 csstable = document.createElement('csstable'),
@@ -1016,10 +733,6 @@ FBL.ns(function () {
                                                 ftBox.appendChild(title);
                                                 ftBox.appendChild(csstable);
                                                 
-<<<<<<< HEAD
-=======
-                                                //styleSheet.innerHTML='dialog dialog h1,dialog h2,dialog h3,dialog h4,dialog h5,dialog h6,dialog p,dialog hr,dialog article,dialog aside,dialog section,dialog figure,dialog footer,dialog header,dialogdl,dialog dt,dialog dd,dialog ul,dialog ol,dialog li,dialog th,dialog td,dialogform,dialog fieldset,dialog input,dialog button,dialog textarea,dialog *{margin:0;padding:0;}dialog header,dialog nav,dialog footer,dialog wrapper,dialog csstable,dialog marginbox,dialog contentbox,dialog paddingbox,dialog borderbox,dialog section{display:block;}dialog button,dialog input,dialog select,dialog textarea{font:12px/1 Tahoma,Arial;}dialog button,dialog h1,dialog h2,dialog h3,dialog h4,dialog h5,dialog h6{font-size:100%;font:normal 12px Tahoma,Arial;}dialog li{list-style:none;}dialog button,dialog input,dialog select,dialog textarea{font-size:100%;border:none;background:none;}dialog input:focus,dialog textarea:focus{outline:none;}dialog fieldset,dialog img{border:0 none;}dialog img{vertical-align:middle;}dialog table{border:0 none !important;margin:0 !important;padding:border-collapse:collapse;border-spacing:0;}dialog q:before,dialog q:after{content:"";}dialog address,dialog cite,dialog em{font-style:normal;}dialog{z-index:2147483647;border:1px solid #eee;display:block;position:absolute;top:200px;left:200px;width:490px;height:auto;-moz-border-radius:3px;-moz-box-shadow:0 0 10px rgba(0,0,0,0.2);background:#ededed;margin:0;padding:0;text-align:start;color:#333;font-family:Arial;font-size:11px;}layout{position:relative;width:100%;width:284px;float:left;}dialog h1{margin:0;padding:0;color:#F47A24;font-size:22px;font-weight:bold;font-family:Arial;line-height:140%;text-indent:5px;border-bottom:1px dashed #d5d5d5;height:31px;text-align:left;background:#112;-moz-border-radius:3px 3px 0 0;border-radius:3px 3px 0 0;}csstable{font-size:11px;margin:7px auto auto 15px;border-right:1px dashed #d5d5d5;width:190px;float:left;}csstable tr{height:16px;}csstable .cssname{width:102px;font-weight:bold;}marginbox,contentbox,paddingbox,borderbox{margin:17px auto;}marginbox{width:200px;height:140px;border:1px dashed #000;}borderbox{width:150px;height:100px;border:1px dashed #000;}paddingbox{width:100px;height:60px;border:1px dashed #000;}contentbox{width:50px;height:20px;border:1px dashed #000;}.layout-figure{position:absolute;font-size:10px;}.figure_x{top:77px;}.figure_y{right:138px}.margin-left{right:219px;text-align:right;}.margin-right{left:220px;text-align:left;}.margin-top{top:24px;}.margin-bottom{top:136px;}.border-left{right:194px;text-align:right;}.border-right{left:194px;text-align:left;}.border-top{top:41px;}.border-bottom{top:114px;}.offset-left{right:245px;text-align:right;}.offset-right{left:245px;text-align:left;}.offset-top{top:6px;}.offset-bottom{top:158px;}.padding-left{right:170px;text-align:right;}.padding-right{left:170px;text-align:left;}.padding-top{top:60px;}.padding-bottom{top:94px;}.label-margin{top:19px;left:43px;}.label-border{top:38px;left:69px;}.label-padding{top:56px;left:95px;}.label-content{margin-top:4px;margin-left:auto;margin-right:auto;width:100%;hight:100%;display:block;text-align:center;}.label-offset{left:38px;top:5px;}';
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                                 styleSheet.setAttribute('href', 'resource://firetestie_r/firetestie.css');
                                                 styleSheet.setAttribute('rel', 'stylesheet');
                                                 ftBox.appendChild(styleSheet);
@@ -1028,18 +741,10 @@ FBL.ns(function () {
                                                 
                                                 //clear float
                                                 clear.style.clear = 'both';
-<<<<<<< HEAD
                                                 var matchResult = match(args[arg]);
                                                 if (!!forceMatch) {
                                                     ftBox.style.width = '327px';
                                                     log(matchResult);
-=======
-                                                //Firebug.Console.log(boxStyle);
-                                                var matchResult = match(args[arg]);
-                                                
-                                                if (!!forceMatch) {
-                                                    //ftBox.setAttribute('className','mod2');
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                                     var pass = true;
                                                     if (matchResult) {
                                                         cssTableInner += ('<tr><th class="cssname"></th><th>Element</th><th style="padding-left:20px;">Rule</th></tr>');
@@ -1064,12 +769,8 @@ FBL.ns(function () {
                                                     csstable.children[0].style.width = '90%';
                                                     ftBox.appendChild(clear);
                                                 } else {
-<<<<<<< HEAD
 
                                                     ftBox.style.width = '490px';
-=======
-                                                    ftBox.setAttribute('className', 'mod1');
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                                     ftBox.appendChild(layout);
                                                     ftBox.appendChild(clear);
                                                     
@@ -1938,11 +1639,7 @@ FBL.ns(function () {
                                         })();
                                 },
                                 styleNames = {
-<<<<<<< HEAD
                                     /* 'font-family' : ['fontFamily', true],
-=======
-                                    'font-family' : ['fontFamily', true],
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                     'font-size' : ['fontSize', true],
                                     'font-weight' : ['fontWeight', true],
                                     'font-style' : ['fontStyle', true],
@@ -1956,7 +1653,6 @@ FBL.ns(function () {
                                     'text-align' : ['textAlign', true],
                                     'vertical-align' : ['verticalAlign', true],
                                     'direction' : ['direction', false],
-<<<<<<< HEAD
                                     'background-color' : ['backgroundColor', true] */
                                     
                                     
@@ -2023,9 +1719,6 @@ FBL.ns(function () {
                                     'list-style-type':['listStyleType',false],
                                     'marker-offset':['markerOffset',false]
 
-=======
-                                    'background-color' : ['backgroundColor', true]
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                 },
                                 readFontStyles = function (style) {
                                     
@@ -2035,46 +1728,12 @@ FBL.ns(function () {
                                             styles[styleNames[styleName][0]] =
                                                 (style.getPropertyCSSValue(styleName).cssText) || '';
                                         }
-<<<<<<< HEAD
-=======
                                         
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                     }
                                     
                                     return styles;
                                 },
                                 onInspectingClick = function (e) {
-<<<<<<< HEAD
-=======
-                                    /* if(e.ctrlKey){
-                                    var win = (e.target.ownerDocument ? e.target.ownerDocument.defaultView : null),
-                                    style=(frameDoc||e.currentTarget).defaultView.getComputedStyle(e.target,""),
-                                    boxStyle=Css.readBoxStyles(style),
-                                    cssTableInner="",
-                                    offset = Dom.getLTRBWH(e.target),
-                                    x = offset.left - Math.abs(boxStyle.marginLeft),
-                                    y = offset.top - Math.abs(boxStyle.marginTop),
-                                    w = offset.width - (boxStyle.paddingLeft + boxStyle.paddingRight + boxStyle.borderLeft + boxStyle.borderRight),
-                                    h = offset.height - (boxStyle.paddingTop + boxStyle.paddingBottom + boxStyle.borderTop + boxStyle.borderBottom);
-                                    
-                                    multi.element=e.target;
-                                    multi.drawArgs={
-                                    title:(e.target.tagName+(e.target.id?('#'+e.target.id):'')),
-                                    css:style,
-                                    x:x,
-                                    y:y,
-                                    w:w,
-                                    h:h
-                                    };
-                                    Firebug.Console.log('ctrl+mouse1');
-                                    } */
-                                    /* if(e.ctrlKey){
-                                    multi.push(e.target);
-                                    Firebug.Console.log('CTRL-CLICK');
-                                    }
-                                    Firebug.Console.log(e);
-                                    Firebug.Console.log('CLICK'); */
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                     if (isMulti) {
                                         if (multi.length === 0 || multi[multi.length - 1] !== e.target) {
                                             multi.push(e.target);
@@ -2096,26 +1755,15 @@ FBL.ns(function () {
                                         /* var la=document.createElement('img');
                                         la.src="resource://firetestie_r/data.png";
                                         document.body.appendChild(la); */
-<<<<<<< HEAD
                                         if (multi.length == 2) {
                                             var frameOffset = getFrameOffset(e.target.ownerDocument.defaultView);
                                             showPbox(multi[0], multi[1], (e.clientX + frameOffset.left), (e.clientY + frameOffset.top));
-=======
-                                        if(multi.length == 2) {
-                                             var frameOffset = getFrameOffset(e.target.ownerDocument.defaultView);
-                                            showPbox(multi[0], multi[1],(e.clientX + frameOffset.left),(e.clientY + frameOffset.top));
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                         }
                                         
                                     }
                                     Events.cancelEvent(e);
                                 },
-<<<<<<< HEAD
                                 showPbox = function (ele1, ele2, x, y) {
-=======
-                                showPbox = function (ele1, ele2,x,y) {
-                                    log('show PBOX');
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                     var pbox = document.getElementById('pbox'),
                                     a = getLTRBWH(ele1),
                                     b = getLTRBWH(ele2);
@@ -2132,7 +1780,6 @@ FBL.ns(function () {
                                         //fix一个奇怪的bug
                                         pbox.style.zIndex = '99999999999999999999999999999999999999999';
                                     }
-<<<<<<< HEAD
                                     var tX = 0;
                                     var tY = 0;
                                     var w = 298;
@@ -2153,14 +1800,6 @@ FBL.ns(function () {
                                         tX = 0;
                                     pbox.style.left = tX + 'px';
                                     pbox.style.top = tY + 'px';
-=======
-                                    pbox.style.left=x+'px';
-                                    pbox.style.top=y+'px';
-                                    log(x);
-                                    log(y);
-                                    log(pbox.style.x);
-                                    log(pbox.style.y);
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                     //pbox.setAttribute('style',"right:298px !important;top:5px !important; ");
                                     pbox.innerHTML = '<div class=" wrapper">' +
                                         '<div class=" tag_a">' + ele1.tagName + '</div>' +
@@ -2172,7 +1811,6 @@ FBL.ns(function () {
                                         '</div>';
                                 },
                                 onInspectingMouseMove = function (e) {
-<<<<<<< HEAD
                                     
                                     var frameOffset = getFrameOffset(e.target.ownerDocument.defaultView);
                                     var pbox = document.getElementById('pbox');
@@ -2182,34 +1820,6 @@ FBL.ns(function () {
                                         return;
                                     } else if (ftBox) {
                                         
-=======
-                                    /* var f=false,
-                                    tout=0;
-                                    return function(e){
-                                    if(!f){
-                                    if(ftBox){
-                                    var frameOffset=getFrameOffset(e.target.ownerDocument.defaultView);
-                                    
-                                    setftBox((e.clientX+frameOffset.left),(e.clientY+frameOffset.top));
-                                    // if(multi.length>2){
-                                    // showPbox(multi[0],multi[1]);
-                                    // }
-                                    
-                                    }
-                                    setTimeout(function(){
-                                    f=true;
-                                    },10);
-                                    }
-                                    }; */
-                                    var frameOffset = getFrameOffset(e.target.ownerDocument.defaultView);
-                                    var pbox = document.getElementById('pbox');
-                                    if(pbox){
-                                        
-                                        showPbox(multi[0],multi[1],(e.clientX + frameOffset.left),(e.clientY + frameOffset.top));
-                                        return;
-                                    }else if (ftBox) {
-  
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                         setftBox((e.clientX + frameOffset.left), (e.clientY + frameOffset.top));
                                         // if(multi.length>2){
                                         // showPbox(multi[0],multi[1]);
@@ -2240,11 +1850,7 @@ FBL.ns(function () {
                                     };
                                 },
                                 setftBox = function (x, y) {
-<<<<<<< HEAD
                                     if (document.getElementById('pbox')) {
-=======
-                                    if(document.getElementById('pbox')){
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                         return;
                                     }
                                     var ftBoxOffset = Dom.getLTRBWH(ftBox),
@@ -2304,7 +1910,6 @@ FBL.ns(function () {
                                     Firebug.Inspector.
                                     highlightObject([e.target,multi],context,HIGHLIGHTTYPE,BOXFRAME,"green",true);
                                     } */
-<<<<<<< HEAD
                                     var pbox = document.getElementById('pbox');
                                     var frameOffset = getFrameOffset(e.target.ownerDocument.defaultView);
                                     if (pbox) {
@@ -2317,27 +1922,10 @@ FBL.ns(function () {
                                             _highlightObject.call(Firebug.Inspector, e.target, context, HIGHLIGHTTYPE, BOXFRAME, "#FCFFA7", true);
                                         } else {
 
-=======
-                                     var pbox = document.getElementById('pbox');
-                                     var frameOffset=getFrameOffset(e.target.ownerDocument.defaultView);
-                                     if(pbox){
-                                     
-                                        showPbox(multi[0],multi[1],(e.clientX + frameOffset.left),(e.clientY + frameOffset.top));
-                                        
-                                     }else{
-                                        if (multi.length === 0) {
-                                            /* Firebug.Inspector.
-                                            highlightObject(e.target, context, HIGHLIGHTTYPE, BOXFRAME, "#FCFFA7", true); */
-                                            _highlightObject.call(Firebug.Inspector, e.target, context, HIGHLIGHTTYPE, BOXFRAME, "#FCFFA7", true);
-                                        } else {
-                                            /* Firebug.Inspector.
-                                            highlightObject(multi, context, HIGHLIGHTTYPE, BOXFRAME, ["#FCFFA7",'green'], true); */
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                             _highlightObject.call(Firebug.Inspector, multi, context, HIGHLIGHTTYPE, BOXFRAME, ["#FCFFA7", 'green'], true);
                                         }
                                     }
                                     
-<<<<<<< HEAD
                                     evt.addListerner(e.target.ownerDocument, "click", onInspectingClick);
                                     evt.addListerner(e.target.ownerDocument, "keyup", onHotKeyUp);
                                     evt.addListerner(e.target.ownerDocument, 'keydown', onAlt);
@@ -2346,84 +1934,17 @@ FBL.ns(function () {
                                         var frameDoc = e.target.contentWindow.document;
                                         evt.addListerner(frameDoc, "mouseover", onInspectingMouseOver);
                                         evt.addListerner(frameDoc, "mouseout", onInspectingMouseOut);
-=======
-                                    
-                                    //e.target.ownerDocument.addEventListener("click",onInspectingClick,true);
-                                    evt.addListerner(e.target.ownerDocument, "click", onInspectingClick);
-                                    evt.addListerner(e.target.ownerDocument, "keyup", onHotKeyUp);
-                                    evt.addListerner(e.target.ownerDocument, 'keydown', onAlt);
-                                    
-                                    
-                                    /* var win = (e.target.ownerDocument ? e.target.ownerDocument.defaultView : null),
-                                    style = (frameDoc || e.currentTarget)
-                                    .defaultView.getComputedStyle(e.target, ""),
-                                    boxStyle = Css.readBoxStyles(style),
-                                    cssTableInner = "",
-                                    offset = Dom.getLTRBWH(e.target),
-                                    x = offset.left - Math.abs(boxStyle.marginLeft),
-                                    y = offset.top - Math.abs(boxStyle.marginTop),
-                                    w = offset.width - (boxStyle.paddingLeft +
-                                            boxStyle.paddingRight +
-                                            boxStyle.borderLeft +
-                                            boxStyle.borderRight),
-                                    h = offset.height - (boxStyle.paddingTop +
-                                            boxStyle.paddingBottom +
-                                            boxStyle.borderTop +
-                                            boxStyle.borderBottom); */
-                                    
-                                    if (e.target.tagName === 'IFRAME' || e.target.tagName === 'FRAMESET') {
-                                        var frameDoc = e.target.contentWindow.document;
-                                        //frameDoc.addEventListener("mouseover",onInspectingMouseOver,true);
-                                        evt.addListerner(frameDoc, "mouseover", onInspectingMouseOver);
-                                        //frameDoc.addEventListener("mouseout",onInspectingMouseOut,true);
-                                        evt.addListerner(frameDoc, "mouseout", onInspectingMouseOut);
-                                        //e.target.contentWindow.parent.document.removeEventListener('mouseover',onInspectingMouseOver,true);
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                         evt.removeListener(e.target.contentWindow.parent.document, 'mouseover', onInspectingMouseOver);
                                         
                                     }
                                     
-<<<<<<< HEAD
                                     evt.addListerner(e.target, "mousemove", onInspectingMouseMove);
                                   
-=======
-                                    //e.target.addEventListener("mousemove",onInspectingMouseMove,true);
-                                    evt.addListerner(e.target, "mousemove", onInspectingMouseMove);
-                                    /* if(multi==={}){
-                                    drawBox([{
-                                    title:(e.target.tagName+(e.target.id?('#'+e.target.id):'')),
-                                    css:style,
-                                    x:x,
-                                    y:y,
-                                    w:w,
-                                    h:h
-                                    }
-                                    ]);
-                                    }else{
-                                    drawBox([{
-                                    title:(e.target.tagName+(e.target.id?('#'+e.target.id):'')),
-                                    css:style,
-                                    x:x,
-                                    y:y,
-                                    w:w,
-                                    h:h
-                                    },
-                                    multi.drawArgs
-                                    ]);
-                                    } */
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                     
                                     if (multi.length === 0) {
                                         drawBox([e.target]);
                                     } else {
-<<<<<<< HEAD
 
-=======
-                                        //drawBox(multi);
-                                        /* if (multi.length == 2) {
-                                            showPbox(multi[0], multi[1],);
-                                        } */
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                     }
                                     
                                     var frameOffset = getFrameOffset(e.target.ownerDocument.defaultView);
@@ -2450,15 +1971,7 @@ FBL.ns(function () {
                                         };
                                     }
                                 },
-<<<<<<< HEAD
                                 loadConfigure=function(){
-=======
-                                
-                                show = function () {
-                                    document = undefined;
-                                    ready();
-                                    //some text-align
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                     Components.utils.import("resource://gre/modules/FileUtils.jsm");
                                     Components.utils.import("resource://gre/modules/NetUtil.jsm");
                                     var file = FileUtils.getFile("ProfD", ["firetestie.json"]);
@@ -2469,7 +1982,6 @@ FBL.ns(function () {
                                     channel.contentType = "application/json";
                                     NetUtil.asyncFetch(channel, function (inputStream, status) {
                                             var data = NetUtil.readInputStreamToString(inputStream, inputStream.available());
-<<<<<<< HEAD
                                             match(data);
                                             var la = match();
                                             
@@ -2573,13 +2085,6 @@ FBL.ns(function () {
                                     
                                    
                                     
-=======
-                                            
-                                            match(data);
-                                            
-                                        });
-                                    
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                     var textWrapper = domplate({
                                                 mainWrapper : DIV({
                                                         style : 'margin:25px;'
@@ -2594,17 +2099,11 @@ FBL.ns(function () {
                                                         }, "FireTestie"),
                                                     BR(),
                                                     SPAN("E")),
-<<<<<<< HEAD
                                                 EnableBtn :INPUT({
-=======
-                                                EnableBtn :
-                                                BUTTON({
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                                         type : 'button',
                                                         value : 'Disabled',
                                                         //disabled:"true",
                                                         onclick : '$onEnabledBtnClick'
-<<<<<<< HEAD
                                                     }),
                                                     RestartBtn :INPUT({
                                                         type : 'button',
@@ -2627,24 +2126,6 @@ FBL.ns(function () {
                                                 submitSearch : INPUT({
                                                         type : 'submit'
                                                     }),
-=======
-                                                    },
-                                                    "Toogle"),
-                                                onEnabledBtnClick : function (e) {},
-                                                
-                                                searchForm:FORM({
-                                                    method:'GET',
-                                                    action:'#',
-                                                    style:'margin:10px;'
-                                                }),
-                                                searchInput:INPUT({
-                                                    type:'text',
-                                                    style:'width:500px;'
-                                                }),
-                                                submitSearch:INPUT({
-                                                    type:'submit'
-                                                }),
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                                 matchtable :
                                                 TABLE({
                                                         style : 'border-collapse:collapse;border-spacing:0;margin-top:20px;',
@@ -2658,7 +2139,6 @@ FBL.ns(function () {
                                             });
                                     
                                     var panel = context.getPanel('FireTestie');
-<<<<<<< HEAD
                                     var parentNode = panel.panelNode;
                                     var rootTemplateElement = textWrapper.mainWrapper.replace({}, parentNode, textWrapper);
                                     
@@ -2673,40 +2153,17 @@ FBL.ns(function () {
                                         Firebug.Inspector.clearAllHighlights();
                                         var val = searchInput.value,
                                         ret = query(val);
-=======
-                                    //log(panel);
-                                    var parentNode = panel.panelNode;
-                                    var rootTemplateElement = textWrapper.mainWrapper.replace({}, parentNode, textWrapper);
-                                    var la = match();
-                                    var EnableBtnElement = textWrapper.EnableBtn.append(EnableBtnElement, rootTemplateElement, textWrapper);
-                                    var searchForm = textWrapper.searchForm.append(null, rootTemplateElement, textWrapper);
-                                    var searchInput = textWrapper.searchInput.append(null, rootTemplateElement, searchForm);
-                                    var submitSearch = textWrapper.submitSearch.append(null, rootTemplateElement, searchForm);
-                                    var matchTable = textWrapper.matchtable.append(null, rootTemplateElement, textWrapper);
-                                    var cssTable = textWrapper.cssAttrTable.append(null, rootTemplateElement, textWrapper);
-                                    function searchDom(e){
-                                        Firebug.Inspector.clearAllHighlights();
-                                        var val=searchInput.value,
-                                            ret=query(val);
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                         
                                         var w = document.defaultView;
                                         for (var i = 0; i < w.frames.length; i++) {
                                             ret = ret.concat(query(val, w.frames[i].document.body));
                                         }
-<<<<<<< HEAD
                                         
                                         if (ret.length > 0) {
-=======
-                                        log(val);
-                                        log(ret);
-                                        if(ret.length>0){
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                             _highlightObject.call(Firebug.Inspector, ret, context, HIGHLIGHTTYPE, BOXFRAME, ["#FCFFA7", 'green'], true);
                                         }
                                         e && e.preventDefault();
                                     }
-<<<<<<< HEAD
                                     function onSearchInputBlur(e) {
                                         clearInterval(searchInterval);
                                         evt.removeListener(searchInput, 'blur', onSearchInputBlur);
@@ -2726,38 +2183,11 @@ FBL.ns(function () {
                                                 for(var i in allInput){
                                                     allInput[i]!==target && allInput[i].setAttribute && allInput[i].setAttribute('disabled',true);
                                                 }
-=======
-                                    function onSearchInputBlur(e){
-                                        clearInterval(searchInterval);
-                                        evt.removeListener(searchInput,'blur',onSearchInputBlur);
-                                    }
-                                    var searchInterval;
-                                    evt.addListerner(submitSearch,'click',searchDom);
-                                    evt.addListerner(searchInput,'focus',function(){
-                                      /*   evt.addListerner(searchInput,'blur',onSearchInputBlur);
-                                        searchInterval=setInterval(searchDom,20); */
-                                        
-                                    });
-                                    //log(EnableBtnElement);
-                                    //Firebug.match="";
-                                    evt.addListerner(EnableBtnElement, 'click', function (e) {
-                                            var target = e.target;
-                                            //target.disabled='true';
-                                            /*  function lalala() {
-                                            }
-                                            lalala.call(Firebug.Inspector.BoxModelHighlighter); */
-                                            if (target.value === 'Enabled') {
-                                                ready();
-                                                target.setAttribute('value', 'Disabled');
-                                                //target.value="OFF";
-                                                log(textWrapper.EnableBtn);
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                                 alert('Inspector ON');
                                             } else {
                                                 firetestieStop();
                                                 // target.value="ON";
                                                 target.setAttribute('value', 'Enabled');
-<<<<<<< HEAD
                                                  for(var i in allInput){
                                                     allInput[i]!==target && allInput[i].setAttribute && allInput[i].setAttribute('disabled',false);
                                                 }
@@ -2774,109 +2204,6 @@ FBL.ns(function () {
                                     
                                     
                                     
-=======
-                                                alert('Inspector OFF');
-                                            }
-                                        });
-                                    var matchTableTmp = '<tr style="border-top:2px solid #000;">' +
-                                        '<th colspan="3" style="font-size:20px;' +
-                                        'font-weight:bold;">Firetestie.JSON</th>' +
-                                        '</tr>' +
-                                        '<tr style="text-align:start;border-bottom:1px solid #333;">' +
-                                        '<td style="width:30px;"><input type="radio" name="match"' + (forceMatch === undefined ? ' checked' : '') + ' class="match_rule" value=""></td>' +
-                                        '<td style="width:12%;border-right:1px dashed #333;' +
-                                        'padding-left:7px;padding-top:3px;padding-bottom:3px;">' +
-                                        'None</td><td style="padding-left:7px;padding-top:3px;padding-bottom:3px;"></td></tr>';
-                                    
-                                    for (var i in la) {
-                                        
-                                        matchTableTmp += ('<tr style="text-align:start;border-bottom:1px solid #333;">' +
-                                            '<td style="width:30px;"><input type="radio" name="match"' + (forceMatch === i ? ' checked' : '') + ' class="match_rule" value="' + i + '"></td>' +
-                                            '<td style="width:12%;border-right:1px dashed #333;' +
-                                            'padding-left:7px;padding-top:3px;padding-bottom:3px;">' +
-                                            i + '</td><td style="padding-left:7px;padding-top:3px;padding-bottom:3px;">' +
-                                            JSON.stringify(la[i]) +
-                                            '</td></tr>');
-                                        
-                                    }
-                                    
-                                    matchTable.innerHTML = matchTableTmp;
-                                    var allRadio = matchTable.getElementsByClassName('match_rule');
-                                    //log(allRadio);
-                                    for (var i in allRadio) {
-                                        //log(allRadio[i]);
-                                        evt.addListerner(allRadio[i], 'click', function (e) {
-                                                var val = e.target.value,
-                                                forceMatch = val || undefined,
-                                                rule,
-                                                cur,
-                                                selector = '',
-                                                ret;
-                                                if (forceMatch) {
-                                                    Firebug.Inspector.clearAllHighlights();
-                                                    rule = match();
-                                                    cur = rule[val]
-                                                        if (cur) {
-                                                            if (cur.tagName) {
-                                                                selector += cur.tagName;
-                                                            }
-                                                            if (cur.id) {
-                                                                selector += '#' + cur.id;
-                                                            }
-                                                            if (cur.className) {
-                                                                selector += '.' + cur.className;
-                                                            }
-                                                            
-                                                            for (attr in cur) {
-                                                                if (['tagName'/* ,'id','className' */].indexOf(attr) !== -1) {
-                                                                    continue;
-                                                                }
-                                                                /* if(attr==='style'){
-                                                                
-                                                                }else  */
-                                                                if (attr !== 'style') {
-                                                                    var tmp = attr === 'className' ? 'class' : attr;
-                                                                    /*  if(attr==='className'){
-                                                                    attr='class';
-                                                                    } */
-                                                                    selector += '[' + tmp + '="' + cur[attr] + '"]'
-                                                                }
-                                                            }
-                                                        }
-                                                        ret = query(selector);
-                                                    var w = document.defaultView;
-                                                    for (var i = 0; i < w.frames.length; i++) {
-                                                        ret = ret.concat(query(selector, w.frames[i].document.body));
-                                                    }
-                                                    
-                                                    if (cur['style'] && ret.length > 0) {
-                                                        for (var i = 0; i < ret.length; i++) {
-                                                            if (ret[i]instanceof window.Element) {
-                                                                var tmpStyle = ret[i].ownerDocument.defaultView.getComputedStyle(ret[i], null);
-                                                                for (cssMatch in cur['style']) {
-                                                                    var t = tmpStyle[cssMatch];
-                                                                    if (/rgb\(\d+,\s\d+,\s\d+\)/.test(t)) {
-                                                                        t = rgbToHex(t);
-                                                                    }
-                                                                    if (!tmpStyle[cssMatch] || cur['style'][cssMatch] !== t) {
-                                                                        //delBuffer.push(i);
-                                                                        delete ret[i];
-                                                                    }
-                                                                }
-                                                            }
-                                                            
-                                                        }
-                                                    }
-                                                    
-                                                    ret.sort();
-                                                    
-                                                    if (ret.length > 0) {
-                                                        _highlightObject.call(Firebug.Inspector, ret, context, HIGHLIGHTTYPE, BOXFRAME, ["#FCFFA7", 'green'], true);
-                                                    }
-                                                }
-                                            });
-                                    }
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                     
                                     var cssTableTmp = '<tr>';
                                     var count = 0;
@@ -2894,18 +2221,9 @@ FBL.ns(function () {
                                     cssTable.innerHTML = cssTableTmp;
                                     var allCheck = cssTable.getElementsByClassName('cssattr');
                                     for (var i in allCheck) {
-<<<<<<< HEAD
                                         evt.addListerner(allCheck[i], 'change', function (e) {
                                                 var is = e.target.checked,
                                                 val = e.target.value;
-=======
-                                        //log(allRadio[i]);
-                                        evt.addListerner(allCheck[i], 'change', function (e) {
-                                                var is = e.target.checked,
-                                                val = e.target.value;
-                                                /*forceMatch=val || undefined;
-                                                //log(forceMatch); */
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                                 
                                                 if (is) {
                                                     styleNames[val][1] = true;
@@ -2924,10 +2242,7 @@ FBL.ns(function () {
                                         //log('项目'+itemName+'开始匹配');
                                         var pass = true;
                                         var matchResult = {};
-<<<<<<< HEAD
                                         var tmpAttr;
-=======
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                         //log(item);
                                         for (var attr in item) {
                                             //log(style);
@@ -2959,7 +2274,6 @@ FBL.ns(function () {
                                                     }
                                                 }
                                             } else {
-<<<<<<< HEAD
                                                 tmpAttr = param.getAttribute(attr) || param[attr];
                                                 if (!!forceMatch) {
                                                     
@@ -2970,16 +2284,6 @@ FBL.ns(function () {
                                                     };
                                                 }
                                                 if (tmpAttr && tmpAttr.toLowerCase() !== item[attr].toLowerCase()) {
-=======
-                                                if (!!forceMatch) {
-                                                    matchResult[attr] = {
-                                                        status : param[attr] && param[attr].toLowerCase() === item[attr].toLowerCase(),
-                                                        org : param[attr],
-                                                        match_rule : item[attr]
-                                                    };
-                                                }
-                                                if (param[attr] && param[attr].toLowerCase() !== item[attr].toLowerCase()) {
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                                     pass = false;
                                                     if (!forceMatch) {
                                                         break;
@@ -2995,63 +2299,16 @@ FBL.ns(function () {
                                     }
                                     return function (param) {
                                         if (param instanceof window.Element) {
-<<<<<<< HEAD
                                             var resule = false;
                                             var style = param.ownerDocument.defaultView.getComputedStyle(param, null);
                                             if (!!forceMatch) {
                                                 return doMatch(param, style, obj[forceMatch]);
 
-=======
-                                            //log(param);
-                                            var resule = false;
-                                            /* for(var tmp in obj){
-                                            if(tmp!=="style"){
-                                            if(param[tmp]!==obj[tmp]){
-                                            pass
-                                            }
-                                            
-                                            }
-                                            if()
-                                            } */
-                                            var style = param.ownerDocument.defaultView.getComputedStyle(param, null);
-                                            if (!!forceMatch) {
-                                                return doMatch(param, style, obj[forceMatch]);
-                                                /* if(doMatch(param,style,obj[forceMatch])){
-                                                return forceMatch;
-                                                }else{
-                                                return 'N/A';
-                                                } */
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                                 
                                             } else {
                                                 for (var testItem in obj) {
                                                     var itemName = testItem;
-<<<<<<< HEAD
                                                     var pass = doMatch(param, style, obj[itemName]);
-=======
-                                                    //log('项目'+itemName+'开始匹配');
-                                                    /* var pass = true;
-                                                    for (var attr in obj[itemName]) {
-                                                    //log(style);
-                                                    if (attr === 'style') {
-                                                    for (var s in obj[itemName]['style']) {
-                                                    if (style[s] && style[s] !== obj[itemName]['style'][s]) {
-                                                    pass = false;
-                                                    break;
-                                                    }
-                                                    }
-                                                    } else {
-                                                    
-                                                    if (param[attr] && param[attr].toLowerCase() !== obj[itemName][attr].toLowerCase()) {
-                                                    pass = false;
-                                                    break;
-                                                    }
-                                                    }
-                                                    
-                                                    } */
-                                                    var pass = doMatch(param, style, obj[itemName]);
-                                                    //log(pass);
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                                     if (pass) {
                                                         return itemName;
                                                     } else {
@@ -3072,11 +2329,7 @@ FBL.ns(function () {
                                 hide = function () {
                                     //firetestieStop();
                                 },
-<<<<<<< HEAD
                                 firetestieStop = function (callback) {
-=======
-                                firetestieStop = function () {
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                     
                                     evt.removeAll();
                                     if (EnableBtnElement)
@@ -3103,15 +2356,10 @@ FBL.ns(function () {
                                     windowX = 0;
                                     windowY = 0;
                                     
-<<<<<<< HEAD
                                     //forceMatch = undefined;
                                     try{
                                         callback();
                                     }catch(e){}
-=======
-                                    forceMatch = undefined;
-                                    
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
                                 };
                                 return {
                                     name : "FireTestie",
@@ -3128,9 +2376,5 @@ FBL.ns(function () {
                     //Firebug.chrome.$('fbCommandLine').mInputField.style.fontSizeAdjust='none';
                 });
         }
-<<<<<<< HEAD
     });
  
-=======
-    });
->>>>>>> b0a079878f968456bcfee666d3142ba989420529

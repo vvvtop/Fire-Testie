@@ -224,7 +224,6 @@ contentbox {
 /*pbox*/
 
 .pbox{
-<<<<<<< HEAD
     -moz-box-shadow:0 0 10px rgba(0,0,0,0.2) !important;
     position: fixed !important; 
     background: url("resource://firetestie_r/box.png") no-repeat scroll 0% 0% #fff !important; 
@@ -232,20 +231,11 @@ contentbox {
     height: 212px !important;
     opacity:0.65 !important;
     text-align:center !important;
-=======
-    -moz-box-shadow:0 0 10px rgba(0,0,0,0.2) ;
-    position: fixed ; 
-    background: url("resource://firetestie_r/box.png") no-repeat scroll 0% 0% #fff ; 
-    width: 298px ; 
-    height: 212px ;
-    opacity:0.65 ;
-    text-align:center ;
->>>>>>> b0a079878f968456bcfee666d3142ba989420529
 }
 #pbox .wrapper{
-    width:100% ;
-    height:100% ;
-    position:relative ;
+    width:100% !important;
+    height:100% !important;
+    position:relative !important;
     
 }
 #pbox .tag_a,#pbox .tag_b,
@@ -253,46 +243,46 @@ contentbox {
 #pbox .d3,#pbox .d4
 
 {
-    position:absolute ;
-    height:20px ;
-    width:100px ;
-    line-height:20px ;
-    background:#112435 ;
-    color:#fff ;
+    position:absolute !important;
+    height:20px !important;
+    width:100px !important;
+    line-height:20px !important;
+    background:#112435 !important;
+    color:#fff !important;
     
     
 }
 
 #pbox .tag_a{
-    left:8px ;
-    top:25px ;
-    background:#FCFFA7 ;
-    color:#333 ;
+    left:8px !important;
+    top:25px !important;
+    background:#FCFFA7 !important;
+    color:#333 !important;
 }
 #pbox .tag_b{
-    left:188px ;
-    top:172px ;
-    background:green ;
+    left:188px !important;
+    top:172px !important;
+    background:green !important;
     
 }
 #pbox .d1{
-    left:148px ;
-    top:6px ;
+    left:148px !important;
+    top:6px !important;
     
 }
 #pbox .d2{
-    left:126px ;
-    top:73px ;
+    left:126px !important;
+    top:73px !important;
     
 }
 #pbox .d3{
-    left:77px ;
-    top:117px ;
+    left:77px !important;
+    top:117px !important;
     
 }
 #pbox .d4{
-    left:39px ;
-    top:172px ;
+    left:39px !important;
+    top:172px !important;
     
 }
 .match{
