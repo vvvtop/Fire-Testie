@@ -1728,7 +1728,6 @@ FBL.ns(function () {
                                             styles[styleNames[styleName][0]] =
                                                 (style.getPropertyCSSValue(styleName).cssText) || '';
                                         }
-                                        
                                     }
                                     
                                     return styles;
