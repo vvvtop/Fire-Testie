@@ -48,7 +48,6 @@ dialog{
 	position:absolute;
 	top:200px;
 	left:200px;
-	
 	height:auto;
 	-moz-border-radius:3px;
 	-moz-box-shadow:0 0 10px rgba(0,0,0,0.2);
@@ -59,12 +58,13 @@ dialog{
 	color:#333;
 	font-family:Arial;
 	font-size:11px;
+    right:auto !important;
 }
-dialog .mod1{
-    width:490px;
+.mod1{
+    width:490px !important;
 }
-dialog .mod2{
-    width:400px;
+.mod2{
+    width:400px !important;
 }
 layout {
 	position:relative;
@@ -226,8 +226,6 @@ contentbox {
 .pbox{
     -moz-box-shadow:0 0 10px rgba(0,0,0,0.2) !important;
     position: fixed !important; 
-    top: 0px !important; 
-    right: 0px !important; 
     background: url("resource://firetestie_r/box.png") no-repeat scroll 0% 0% #fff !important; 
     width: 298px !important; 
     height: 212px !important;
