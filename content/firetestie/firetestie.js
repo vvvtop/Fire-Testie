@@ -20,23 +20,26 @@ var _highlightObject_old = function() {
 		return re;
 	}
 }();
+//打开配置文件目录
 var openProfD=function(){
   // Get the profile directory.
   let currProfD = Services.dirsvc.get("ProfD", Ci.nsIFile);
   let profileDir = currProfD.path+'\\firetestie.json';
 
   // Show the profile directory.
-  let nsLocalFile = Components.Constructor("@mozilla.org/file/local;1",
-                                           "nsILocalFile", "initWithPath");
+  let nsLocalFile = Components.Constructor("@mozilla.org/file/local;1","nsILocalFile", "initWithPath");
   new nsLocalFile(profileDir).reveal();
 }
+//页面事件
 var evt = function() {
 	var list = [];
 
 	return {
 		addListerner : function(element, type, callback) {
-			if(!element.addEventListener)
-				return;
+			if(!element.addEventListener){
+        return;
+      }
+				
 			element.addEventListener(type, callback, true);
 			list.push({
 				element : element,
@@ -45,8 +48,9 @@ var evt = function() {
 			});
 		},
 		removeListener : function(element, type, callback) {
-			if(!element.addEventListener)
-				return;
+			if(!element.addEventListener){
+        return;
+      }
 			element.removeEventListener(type, callback, true);
 		},
 		removeAll : function() {
@@ -54,9 +58,7 @@ var evt = function() {
 				for(var index in list) {
 					evt.removeListener(list[index].element, list[index].type, list[index].callback, true);
 				}
-			} catch (e) {
-			}
-
+			} catch (e) {}
 		}
 	};
 }();
@@ -82,7 +84,6 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 				"style" : true,
 				"title" : true
 			};
-
 			return !invisibleElements[elt.nodeName.toLowerCase()];
 		}
 		var getImageMapHighlighter = function(context) {
@@ -93,8 +94,8 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 			var doc = context.window.document;
 
 			var init = function(elt) {
-				if(elt)
-					doc = elt.ownerDocument;
+        elt && (doc = elt.ownerDocument);
+
 				canvas = doc.getElementById('firebugCanvas');
 
 				if(!canvas) {
@@ -128,14 +129,17 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 					getImages : function(mapName, multi) {
 						var i, rect, nsResolver, xpe, elt, elts, images = [], eltsLen = 0;
 
-						if(!mapName)
-							return;
+						if(!mapName){
+              return;
+            }
+							
 						xpe = new XPathEvaluator();
 						nsResolver = xpe.createNSResolver(doc.documentElement);
 						elts = xpe.evaluate("//map[@name='" + mapName + "']", doc, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
-						if(elts.snapshotLength === 0)
+						if(elts.snapshotLength === 0){
 							return;
+            }
 						elts = xpe.evaluate("(//img | //input)[@usemap='#" + mapName + "']", doc.documentElement, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 						eltsLen = elts.snapshotLength;
 
@@ -162,8 +166,9 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 							init(eltArea);
 							v = eltArea.coords.split(",");
 
-							if(!ctx)
+							if(!ctx){
 								ctx = canvas.getContext("2d");
+              }
 
 							ctx.fillStyle = "rgba(135, 206, 235, 0.7)";
 							ctx.strokeStyle = "rgb(44, 167, 220)";
@@ -178,15 +183,16 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 
 								ctx.beginPath();
 
-								if(!multi || (multi && j === 0))
+								if(!multi || (multi && j === 0)){
 									ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
 								shape = eltArea.shape.toLowerCase();
 
-								if(shape === 'rect')
+								if(shape === 'rect'){
 									ctx.rect(rect.left + parseInt(v[0], 10), rect.top + parseInt(v[1], 10), v[2] - v[0], v[3] - v[1]);
-								else if(shape === 'circle')
+								}else if(shape === 'circle'){
 									ctx.arc(rect.left + parseInt(v[0], 10) + ctx.lineWidth / 2, rect.top + parseInt(v[1], 10) + ctx.lineWidth / 2, v[2], 0, Math.PI / 180 * 360, false);
-								else {
+								}else {
 									vLen = v.length;
 									ctx.moveTo(rect.left + parseInt(v[0], 10), rect.top + parseInt(v[1], 10));
 									for( i = 2; i < vLen; i += 2)
@@ -227,14 +233,10 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 		}
 		var getHighlighter = function(type) {
 			if(type == "boxModel") {
-				if(!boxModelHighlighter)
-					boxModelHighlighter = new Firebug.Inspector.BoxModelHighlighter();
-
+        boxModelHighlighter && (boxModelHighlighter = new Firebug.Inspector.BoxModelHighlighter());			
 				return boxModelHighlighter;
 			} else if(type == "frame") {
-				if(!frameHighlighter)
-					frameHighlighter = new Firebug.Inspector.FrameHighlighter();
-
+        frameHighlighter && (frameHighlighter = new Firebug.Inspector.FrameHighlighter());
 				return frameHighlighter;
 			}
 		}
@@ -1641,7 +1643,11 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 
 				return Q;
 			})();
-		}, styleStats = {}, styleNames = {
+		}, 
+    //css属性选项暂存
+    styleStats = {}, 
+    //css风格
+    styleNames = {
 			'color' : ['color', true],
 			'font-family' : ['fontFamily', true],
 			'font-size' : ['fontSize', true],
@@ -1705,7 +1711,8 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 			'list-style-type' : ['listStyleType', false],
 			'marker-offset' : ['markerOffset', false]
 
-		}, readFontStyles = function(style) {
+		}, 
+    readFontStyles = function(style) {
 
 			var styles = {};
 			for(var styleName in styleNames) {
@@ -1719,34 +1726,28 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 			}
 
 			return styles;
-		}, onInspectingClick = function(e) {
+		}, 
+    //检查器的点击事件,在对比模式下用以选择元素
+    onInspectingClick = function(e) {
 			if(isMulti) {
 				if(multi.length === 0 || multi[multi.length - 1] !== e.target) {
 					multi.push(e.target);
 				}multi.length > 2 && multi.shift();
 				//onInspectingMouseOver(e);
 
-				if(multi.length === 0) {
-					/* Firebug.Inspector.
-					 highlightObject(e.target, context, HIGHLIGHTTYPE, BOXFRAME, "#FCFFA7", true); */
-					_highlightObject.call(Firebug.Inspector, e.target, context, HIGHLIGHTTYPE, BOXFRAME, "#FCFFA7", true);
-				} else {
-					/* Firebug.Inspector.
-					 highlightObject(multi, context, HIGHLIGHTTYPE, BOXFRAME, ["#FCFFA7",'green'], true); */
-					_highlightObject.call(Firebug.Inspector, multi, context, HIGHLIGHTTYPE, BOXFRAME, ["#FCFFA7", 'green'], true);
-				}
+				multi.length === 0?
+          _highlightObject.call(Firebug.Inspector, e.target, context, HIGHLIGHTTYPE, BOXFRAME, "#FCFFA7", true):
+          _highlightObject.call(Firebug.Inspector, multi, context, HIGHLIGHTTYPE, BOXFRAME, ["#FCFFA7", 'green'], true);
 
-				/* var la=document.createElement('img');
-				 la.src="resource://firetestie_r/data.png";
-				 document.body.appendChild(la); */
-				if(multi.length == 2) {
-					var frameOffset = getFrameOffset(e.target.ownerDocument.defaultView);
-					showPbox(multi[0], multi[1], (e.clientX + frameOffset.left), (e.clientY + frameOffset.top));
-				}
+        var frameOffset = getFrameOffset(e.target.ownerDocument.defaultView);
+				multi.length == 2 &&
+          showPbox(multi[0], multi[1], (e.clientX + frameOffset.left), (e.clientY + frameOffset.top));
 
 			}
 			Events.cancelEvent(e);
-		}, showPbox = function(ele1, ele2, x, y) {
+		}, 
+    //比较面板
+    showPbox = function(ele1, ele2, x, y) {
 			var pbox = document.getElementById('pbox'), a = getLTRBWH(ele1), b = getLTRBWH(ele2);
 			if(!pbox) {
 				pbox = document.createElement('div');
@@ -1754,10 +1755,6 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 				pbox.setAttribute('class', 'pbox');
 
 				document.body.appendChild(pbox);
-				/* evt.addListerner(pbox,'mouseover',function(){
-				pbox.style.opacity='0.4';
-				}); */
-
 				//fix一个奇怪的bug
 				pbox.style.zIndex = '99999999999999999999999999999999999999999';
 			}
@@ -1783,7 +1780,9 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 			pbox.style.top = tY + 'px';
 			//pbox.setAttribute('style',"right:298px !important;top:5px !important; ");
 			pbox.innerHTML = '<div class=" wrapper">' + '<div class="tag_a">' + ele1.tagName + '</div>' + '<div class="tag_b">' + ele2.tagName + '</div>' + '<div class="d1">' + parseInt(b.y - a.y) + 'px</div>' + '<div class="d2">' + parseInt(b.y - (a.y + a.h)) + 'px</div>' + '<div class="d3">' + parseInt(b.x - (a.x + a.w)) + 'px</div>' + '<div class="d4">' + parseInt(b.x - a.x) + 'px</div>' + '<div class="d5">' + parseInt(b.x + b.w - a.x - a.w) + 'px</div>' + '<div class="d6">' + parseInt(b.y + b.h - a.y - a.h) + 'px</div>' + '</div>';
-		}, onInspectingMouseMove = function(e) {
+		}, 
+    //元素鼠标移动事件,捕获鼠标移动,用以移动检查器面板
+    onInspectingMouseMove = function(e) {
 
 			var frameOffset = getFrameOffset(e.target.ownerDocument.defaultView);
 			var pbox = document.getElementById('pbox');
@@ -1799,7 +1798,9 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 				// }
 
 			}
-		}, getLTRBWH = function(ele) {
+		}, 
+    //计算元素位置大小
+    getLTRBWH = function(ele) {
 			var offset = Dom.getLTRBWH(ele), style = ele.ownerDocument.defaultView.getComputedStyle(ele, ""), boxStyle = Css.readBoxStyles(style), frameOffset = getFrameOffset(ele.ownerDocument.defaultView), w = offset.width - (boxStyle.paddingLeft + boxStyle.paddingRight + boxStyle.borderLeft + boxStyle.borderRight), h = offset.height - (boxStyle.paddingTop + boxStyle.paddingBottom + boxStyle.borderTop + boxStyle.borderBottom), x = offset.left - Math.abs(boxStyle.marginLeft) + frameOffset.left, y = offset.top - Math.abs(boxStyle.marginTop) + frameOffset.top;
 			return {
 				x : x,
@@ -1807,7 +1808,8 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 				w : w,
 				h : h
 			};
-		}, setftBox = function(x, y) {
+		}, 
+    setftBox = function(x, y) {
 			if(document.getElementById('pbox')) {
 				return;
 			}
@@ -1846,29 +1848,16 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 			//e.target.ownerDocument.removeEventListener("click",onInspectingClick,true);
 			evt.removeListener(e.target.ownerDocument, "click", onInspectingClick);
 			lastDom = e.target;
-		}, onInspectingMouseOver = function(e) {
-			/* if(multi==={}){
-			 Firebug.Inspector.
-			 highlightObject(e.target,context,HIGHLIGHTTYPE,BOXFRAME,"green",true);
-			 }else{
-			 Firebug.Inspector.
-			 highlightObject([e.target,multi],context,HIGHLIGHTTYPE,BOXFRAME,"green",true);
-			 } */
+		},
+    //页面元素的mouseover事件，用以启动检查器
+    onInspectingMouseOver = function(e) {
+
 			var pbox = document.getElementById('pbox');
 			var frameOffset = getFrameOffset(e.target.ownerDocument.defaultView);
-			if(pbox) {
+      pbox?showPbox(multi[0], multi[1], (e.clientX + frameOffset.left), (e.clientY + frameOffset.top)):
+        (multi.length === 0?_highlightObject.call(Firebug.Inspector, e.target, context, HIGHLIGHTTYPE, BOXFRAME, "#FCFFA7", true):
+          _highlightObject.call(Firebug.Inspector, multi, context, HIGHLIGHTTYPE, BOXFRAME, ["#FCFFA7", 'green'], true))
 
-				showPbox(multi[0], multi[1], (e.clientX + frameOffset.left), (e.clientY + frameOffset.top));
-
-			} else {
-				if(multi.length === 0) {
-
-					_highlightObject.call(Firebug.Inspector, e.target, context, HIGHLIGHTTYPE, BOXFRAME, "#FCFFA7", true);
-				} else {
-
-					_highlightObject.call(Firebug.Inspector, multi, context, HIGHLIGHTTYPE, BOXFRAME, ["#FCFFA7", 'green'], true);
-				}
-			}
 
 			evt.addListerner(e.target.ownerDocument, "click", onInspectingClick);
 			evt.addListerner(e.target.ownerDocument, "keyup", onHotKeyUp);
@@ -1894,7 +1883,9 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 			setftBox((e.clientX + frameOffset.left), (e.clientY + frameOffset.top));
 			ftBox.display = 'block';
 
-		}, getFrameOffset = function(winFrame, offset) {
+		}, 
+    //兼容框架集的frame计算
+    getFrameOffset = function(winFrame, offset) {
 			if(!offset) {
 				offset = {
 					left : 0,
@@ -1903,7 +1894,6 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 			}
 			var tmp = Dom.getLTRBWH(winFrame.frameElement);
 			if(winFrame.parent !== winFrame.parent.parent) {
-
 				getFrameOffset(winFrame.parent, tmp);
 			} else {
 				return {
@@ -1911,13 +1901,14 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 					top : offset.top + tmp.top
 				};
 			}
-		}, loadConfigure = function() {
+		}, 
+    //读取match配置文件
+    loadConfigure = function() {
 			Components.utils.import("resource://gre/modules/FileUtils.jsm");
 			Components.utils.import("resource://gre/modules/NetUtil.jsm");
 			var file = FileUtils.getFile("ProfD", ["firetestie.json"]);
-			if(!file.exists()) {
-				file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0777);
-			}
+      !file.exists() && file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0777);
+
 			var channel = NetUtil.newChannel(file);
 			channel.contentType = "application/json";
 			NetUtil.asyncFetch(channel, function(inputStream, status) {
@@ -1935,9 +1926,7 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 				var allRadio = mTable.getElementsByClassName('match_rule');
 				var allInput = mTable.getElementsByClassName('match_field');
 				var profDlink = mTable.getElementsByClassName('prof_d');
-        if(profDlink.length>0){
-          profDlink[0].addEventListener('click',openProfD,true);
-        }
+        profDlink.length>0 && profDlink[0].addEventListener('click',openProfD,true);
 				for(var i in allInput) {
 					evt.addListerner(allInput[i], 'change', function(e) {
 						var target = e.target;
@@ -1949,7 +1938,6 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 							} catch (e) {
 								tmp = undefined;
 							}
-							log(tmp);
 							if(tmp) {
 								matchRuleObj[ruleName] = tmp;
 								target.setAttribute('lastValue', target.value);
@@ -1969,15 +1957,10 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 							rule = match();
 							cur = rule[val]
 							if(cur) {
-								if(cur.tagName) {
-									selector += cur.tagName;
-								}
-								if(cur.id) {
-									selector += '#' + cur.id;
-								}
-								if(cur.className) {
-									selector += '.' + cur.className;
-								}
+                cur.tagName && (selector += cur.tagName);
+                cur.id && (selector += '#' + cur.id);
+                cur.className && (selector += '.' + cur.className);
+
 
 								for(attr in cur) {
 									if(['tagName'/* ,'id','className' */].indexOf(attr) !== -1) {
@@ -1997,32 +1980,33 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 							}
 							if(cur['style'] && ret.length > 0) {
 								for(var i = 0; i < ret.length; i++) {
-									if(ret[i] instanceof window.Element) {
-										var tmpStyle = ret[i].ownerDocument.defaultView.getComputedStyle(ret[i], null);
-										for(cssMatch in cur['style']) {
-											var t = tmpStyle[cssMatch];
-											if(/rgb\(\d+,\s\d+,\s\d+\)/.test(t)) {
-												t = rgbToHex(t);
-											}
-											if(!tmpStyle[cssMatch] || cur['style'][cssMatch] !== t) {
-												//delBuffer.push(i);
-												delete ret[i];
-											}
-										}
-									}
-
+                  if(!ret[i] instanceof window.Element) {
+                    continue;
+                  }
+                  var tmpStyle = ret[i].ownerDocument.defaultView.getComputedStyle(ret[i], null);
+                  for(cssMatch in cur['style']) {
+                    var t = tmpStyle[cssMatch];
+                    
+                    /rgb\(\d+,\s\d+,\s\d+\)/.test(t) && (t = rgbToHex(t));
+                    if(!tmpStyle[cssMatch] || cur['style'][cssMatch] !== t) {
+                      delete ret[i];
+                    }
+                  }
 								}
 							}
 							ret.sort();
-
-							if(ret.length > 0) {
-								_highlightObject.call(Firebug.Inspector, ret, context, HIGHLIGHTTYPE, BOXFRAME, ["#FCFFA7", 'green'], true);
-							}
+              ret.length > 0 && _highlightObject.call(Firebug.Inspector, ret, context, HIGHLIGHTTYPE, BOXFRAME, ["#FCFFA7", 'green'], true);
 						}
 					});
 				}
 			});
-		}, mTable, matchRuleObj, show = function() {
+		}, 
+    //保存panel中的match table
+    mTable, 
+    //match rule对象
+    matchRuleObj, 
+    //扩展的show接口
+    show = function() {
 			document = undefined;
 			ready();
 			//some text-align
@@ -2083,12 +2067,7 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 			var rootTemplateElement = textWrapper.mainWrapper.replace({}, parentNode, textWrapper);
 			
       var panelStyle = document.createElement('link');
-			panelStyle.setAttribute('href', 'resource://firetestie_r/panel.css');
-			panelStyle.setAttribute('rel', 'stylesheet');
-			rootTemplateElement.appendChild(panelStyle);
-			log(panelStyle);
-      
-      
+			
 			var fieldset1 = textWrapper.fieldset1.append(null, rootTemplateElement, textWrapper);
 			var fieldset2 = textWrapper.fieldset2.append(null, rootTemplateElement, textWrapper);
 			var fieldset3 = textWrapper.fieldset3.append(null, rootTemplateElement, textWrapper);
@@ -2100,6 +2079,11 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 			var submitSearch = textWrapper.submitSearch.append(null, fieldset1, searchForm);
 			var matchTable = mTable = textWrapper.matchtable.append(null, fieldset2, textWrapper);
 			var cssTable = textWrapper.cssAttrTable.append(null, fieldset3, textWrapper);
+      
+      panelStyle.setAttribute('href', 'resource://firetestie_r/panel.css');
+			panelStyle.setAttribute('rel', 'stylesheet');
+			rootTemplateElement.appendChild(panelStyle);
+      
 			var searchDom = function(e) {
 				Firebug.Inspector.clearAllHighlights();
 				var val = searchInput.value, ret = query(val);
@@ -2137,7 +2121,8 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 					firetestieStop();
 					// target.value="ON";
 					target.setAttribute('value', 'Enabled');
-					for(var i in allInput) {allInput[i] !== target && allInput[i].setAttribute && allInput[i].setAttribute('disabled', false);
+					for(var i in allInput) {
+            allInput[i] !== target && allInput[i].setAttribute && allInput[i].setAttribute('disabled', false);
 					}
 					alert('Inspector OFF');
 
@@ -2150,9 +2135,7 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 			for(var styleName in styleNames) {
 				count += 1;
 				cssTableTmp += '<td><input id="' + styleNames[styleName][0] + '_cssattr" type="checkbox" value="' + styleName + '" name="cssattr" class="cssattr"' + (styleNames[styleName][1] ? ' checked' : '') + '><label for="' + styleNames[styleName][0] + '_cssattr">' + styleNames[styleName][0] + '</label></td>';
-				if(count % 4 === 0) {
-					cssTableTmp += '</tr><tr>';
-				}count
+				count % 4 === 0 && (cssTableTmp += '</tr><tr>');
 			}
 			cssTableTmp += '</tr>'
 
@@ -2161,16 +2144,23 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 			for(var i in allCheck) {
 				evt.addListerner(allCheck[i], 'change', function(e) {
 					var is = e.target.checked, val = e.target.value, tmp = -1;
-					log(styleStats);
-					if(is) {
-						styleStats[styleNames[val][0]] = true;
-
-					} else {
-						styleStats[styleNames[val][0]] = false;
-					}
+          styleStats[styleNames[val][0]]=!!is;
 				});
 			}
-		}, matchTable = null, match = function() {
+		},
+    matchTable = null,
+    /**
+     * 参数为空则返回规则对象
+     * 参数不唯恐则进行比较
+     *
+     * @param {HTMLFormElement} param 需要检查的元素
+     * @param {CSSStyleDeclaration} style 需要检查的元素样式
+     * @param {object} item 需要检查的元素的类型
+     */
+    //
+    //param匹配对象
+    //style 样式
+    match = function() {
 			//var obj =matchRuleObj= {};
 			function doMatch(param, style, item) {
 
@@ -2181,12 +2171,8 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 					if(attr === 'style') {
 						for(var s in item['style']) {
 							var curS = style[s];
-							if(style[s] && /rgb\(\d+,\s\d+,\s\d+\)/.test(style[s])) {
-								curS = rgbToHex(style[s]);
-							}
-							if(style[s] && /rgb\(\d+,\s\d+,\s\d+\)/.test(item['style'][s])) {
-								item['style'][s] = rgbToHex(item['style'][s]);
-							}
+              style[s] && /rgb\(\d+,\s\d+,\s\d+\)/.test(style[s]) && (curS = rgbToHex(style[s]));
+              style[s] && /rgb\(\d+,\s\d+,\s\d+\)/.test(item['style'][s]) && (item['style'][s] = rgbToHex(item['style'][s]));
 
 							if(!!forceMatch) {
 								matchResult[s] = {
@@ -2198,7 +2184,6 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 							if(style[s] && style[s] !== item['style'][s]) {
 								pass = false;
 								if(!forceMatch) {
-
 									break;
 								}
 
@@ -2255,20 +2240,20 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 					return matchRuleObj;
 				}
 			}
-		}(), hide = function() {
+		}(), 
+    hide = function() {
 			//firetestieStop();
-		}, firetestieStop = function(callback) {
+		}, 
+    firetestieStop = function(callback) {
 
 			evt.removeAll();
-			if(EnableBtnElement)
-				EnableBtnElement.value = "Enabled";
+      EnableBtnElement && EnableBtnElement.setAttribute('value','Enabled');
+
 			try {
 				var pbox = document.getElementById('pbox');
-
 				document.body.removeChild(pbox);
 				document.body.removeChild(document.getElementById('xxxxdialog'));
-			} catch (e) {
-			};
+			} catch (e) {};
 
 			Firebug.Inspector.clearAllHighlights();
 			document = undefined;
@@ -2284,16 +2269,13 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 			}, windowX = 0;
 			windowY = 0;
 			styleStats = {};
-			//forceMatch = undefined;
 			try {
 				callback();
-			} catch (e) {
-			}
+			} catch (e) {}
 		};
 		return {
 			name : "FireTestie",
 			title : "FireTestie",
-
 			initialize : initialize,
 			show : show,
 			hide : hide,
