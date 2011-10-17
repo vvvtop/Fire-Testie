@@ -33,13 +33,10 @@ var openProfD=function(){
 //页面事件
 var evt = function() {
 	var list = [];
-
 	return {
 		addListerner : function(element, type, callback) {
-			if(!element.addEventListener){
-        return;
-      }
-				
+			if(!element.addEventListener)
+				return;
 			element.addEventListener(type, callback, true);
 			list.push({
 				element : element,
@@ -48,9 +45,8 @@ var evt = function() {
 			});
 		},
 		removeListener : function(element, type, callback) {
-			if(!element.addEventListener){
-        return;
-      }
+			if(!element.addEventListener)
+				return;
 			element.removeEventListener(type, callback, true);
 		},
 		removeAll : function() {
@@ -58,7 +54,9 @@ var evt = function() {
 				for(var index in list) {
 					evt.removeListener(list[index].element, list[index].type, list[index].callback, true);
 				}
-			} catch (e) {}
+			} catch (e) {
+			}
+
 		}
 	};
 }();
@@ -84,6 +82,7 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 				"style" : true,
 				"title" : true
 			};
+
 			return !invisibleElements[elt.nodeName.toLowerCase()];
 		}
 		var getImageMapHighlighter = function(context) {
@@ -94,8 +93,8 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 			var doc = context.window.document;
 
 			var init = function(elt) {
-        elt && (doc = elt.ownerDocument);
-
+				if(elt)
+					doc = elt.ownerDocument;
 				canvas = doc.getElementById('firebugCanvas');
 
 				if(!canvas) {
@@ -129,17 +128,14 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 					getImages : function(mapName, multi) {
 						var i, rect, nsResolver, xpe, elt, elts, images = [], eltsLen = 0;
 
-						if(!mapName){
-              return;
-            }
-							
+						if(!mapName)
+							return;
 						xpe = new XPathEvaluator();
 						nsResolver = xpe.createNSResolver(doc.documentElement);
 						elts = xpe.evaluate("//map[@name='" + mapName + "']", doc, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
-						if(elts.snapshotLength === 0){
+						if(elts.snapshotLength === 0)
 							return;
-            }
 						elts = xpe.evaluate("(//img | //input)[@usemap='#" + mapName + "']", doc.documentElement, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 						eltsLen = elts.snapshotLength;
 
@@ -166,9 +162,8 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 							init(eltArea);
 							v = eltArea.coords.split(",");
 
-							if(!ctx){
+							if(!ctx)
 								ctx = canvas.getContext("2d");
-              }
 
 							ctx.fillStyle = "rgba(135, 206, 235, 0.7)";
 							ctx.strokeStyle = "rgb(44, 167, 220)";
@@ -183,16 +178,15 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 
 								ctx.beginPath();
 
-								if(!multi || (multi && j === 0)){
+								if(!multi || (multi && j === 0))
 									ctx.clearRect(0, 0, canvas.width, canvas.height);
-                }
 								shape = eltArea.shape.toLowerCase();
 
-								if(shape === 'rect'){
+								if(shape === 'rect')
 									ctx.rect(rect.left + parseInt(v[0], 10), rect.top + parseInt(v[1], 10), v[2] - v[0], v[3] - v[1]);
-								}else if(shape === 'circle'){
+								else if(shape === 'circle')
 									ctx.arc(rect.left + parseInt(v[0], 10) + ctx.lineWidth / 2, rect.top + parseInt(v[1], 10) + ctx.lineWidth / 2, v[2], 0, Math.PI / 180 * 360, false);
-								}else {
+								else {
 									vLen = v.length;
 									ctx.moveTo(rect.left + parseInt(v[0], 10), rect.top + parseInt(v[1], 10));
 									for( i = 2; i < vLen; i += 2)
@@ -233,10 +227,14 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 		}
 		var getHighlighter = function(type) {
 			if(type == "boxModel") {
-        boxModelHighlighter && (boxModelHighlighter = new Firebug.Inspector.BoxModelHighlighter());			
+				if(!boxModelHighlighter)
+					boxModelHighlighter = new Firebug.Inspector.BoxModelHighlighter();
+
 				return boxModelHighlighter;
 			} else if(type == "frame") {
-        frameHighlighter && (frameHighlighter = new Firebug.Inspector.FrameHighlighter());
+				if(!frameHighlighter)
+					frameHighlighter = new Firebug.Inspector.FrameHighlighter();
+
 				return frameHighlighter;
 			}
 		}
@@ -2282,7 +2280,7 @@ require(config, modules, function(Css, Dom, Events, Menu, Wrapper, Xml) {
 		};
 	}());
 	Firebug.registerPanel(fireTestiePanel);
-	FireTestie.start = fireTestiePanel.show;
+	//FireTestie.start = fireTestiePanel.show;
 	//Firebug.chrome.$('fbCommandLine').mInputField.style.fontSizeAdjust='none';
 });
 
