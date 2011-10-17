@@ -2,7 +2,7 @@ var FireTestie = {};
 var boxModelHighlighter = null;
 var frameHighlighter = null;
 var inspectDelay = 200;
-var DEBUG = false;
+var DEBUG = true;
 var highlightCSS = "chrome://firebug/content/html/highlighter.css";
 var ident = {
     frame: 0,
@@ -829,8 +829,13 @@ FBL.ns(function () {
                   }
                 },
                 start = function () {
+                  if(!document.body){
+                    firetestieStop();
+                    return;
+                  }
                   if (EnableBtnElement)
                     EnableBtnElement.value = "Disabled";
+                    
                   styleSheet = document.createElement('link');
                   styleSheet.setAttribute('href', 'resource://firetestie_r/firetestie.css');
                   styleSheet.setAttribute('rel', 'stylesheet');
@@ -2260,7 +2265,8 @@ FBL.ns(function () {
                   
                   var textWrapper = domplate({
                         mainWrapper : DIV({
-                            style : 'margin:25px;'
+                            style : 'margin:25px;',
+                            id:"firetestie_wrapper"
                           }),
                         myTag :
                         DIV({
@@ -2301,8 +2307,8 @@ FBL.ns(function () {
                           }),
                         matchtable :
                         TABLE({
-                            style : 'border-collapse:collapse;border-spacing:0;margin-top:20px;',
-                            width : "80%"
+                            width : "80%",
+                            className:"match_table"
                           }),
                         cssAttrTable :
                         TABLE({
@@ -2314,7 +2320,11 @@ FBL.ns(function () {
                   var panel = context.getPanel('FireTestie');
                   var parentNode = panel.panelNode;
                   var rootTemplateElement = textWrapper.mainWrapper.replace({}, parentNode, textWrapper);
-                  
+                  var panelStyle = document.createElement('link');
+                  panelStyle.setAttribute('href', 'resource://firetestie_r/panel.css');
+                  panelStyle.setAttribute('rel', 'stylesheet');
+                  rootTemplateElement.appendChild(panelStyle);
+                  log(panelStyle);
                   var EnableBtnElement = textWrapper.EnableBtn.append(EnableBtnElement, rootTemplateElement, textWrapper);
                   var ReloadBtnElement = textWrapper.RestartBtn.append(EnableBtnElement, rootTemplateElement, textWrapper);
                   var searchForm = textWrapper.searchForm.append(null, rootTemplateElement, textWrapper);
